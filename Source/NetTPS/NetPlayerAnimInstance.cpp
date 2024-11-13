@@ -15,5 +15,12 @@ void UNetPlayerAnimInstance::NativeInitializeAnimation()
 void UNetPlayerAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 {
 	Super::NativeUpdateAnimation(DeltaSeconds);
-
+	
+	if (player)
+	{
+		// 앞, 뒤 방향에 따른 dirV 값 구하자.
+		dirV = FVector::DotProduct(player->GetActorForwardVector(), player->GetVelocity());
+		// 좌, 우 방향에 따른 dirH 값 구하자.
+		dirH = FVector::DotProduct(player->GetActorRightVector(), player->GetVelocity());
+	}
 }
