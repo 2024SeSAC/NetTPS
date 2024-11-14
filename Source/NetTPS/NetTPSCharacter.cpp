@@ -10,6 +10,7 @@
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "InputActionValue.h"
+#include <Kismet/GameplayStatics.h>
 
 DEFINE_LOG_CATEGORY(LogTemplateCharacter);
 
@@ -23,11 +24,11 @@ ANetTPSCharacter::ANetTPSCharacter()
 	
 	// Don't rotate when the controller rotates. Let that just affect the camera.
 	bUseControllerRotationPitch = false;
-	bUseControllerRotationYaw = false;
+	bUseControllerRotationYaw = true;
 	bUseControllerRotationRoll = false;
 
 	// Configure character movement
-	GetCharacterMovement()->bOrientRotationToMovement = true; // Character moves in the direction of input...	
+	GetCharacterMovement()->bOrientRotationToMovement = false; // Character moves in the direction of input...	
 	GetCharacterMovement()->RotationRate = FRotator(0.0f, 500.0f, 0.0f); // ...at this rotation rate
 
 	// Note: For faster iteration times these variables, and many more, can be tweaked in the Character Blueprint
@@ -42,7 +43,8 @@ ANetTPSCharacter::ANetTPSCharacter()
 	// Create a camera boom (pulls in towards the player if there is a collision)
 	CameraBoom = CreateDefaultSubobject<USpringArmComponent>(TEXT("CameraBoom"));
 	CameraBoom->SetupAttachment(RootComponent);
-	CameraBoom->TargetArmLength = 400.0f; // The camera follows at this distance behind the character	
+	CameraBoom->SetRelativeLocation(FVector(0, 40, 60));
+	CameraBoom->TargetArmLength = 150; // The camera follows at this distance behind the character	
 	CameraBoom->bUsePawnControlRotation = true; // Rotate the arm based on the controller
 
 	// Create a follow camera
@@ -50,6 +52,12 @@ ANetTPSCharacter::ANetTPSCharacter()
 	FollowCamera->SetupAttachment(CameraBoom, USpringArmComponent::SocketName); // Attach the camera to the end of the boom and let the boom adjust to match the controller orientation
 	FollowCamera->bUsePawnControlRotation = false; // Camera does not rotate relative to arm
 
+	//  Gun component 
+	compGun = CreateDefaultSubobject<USceneComponent>(TEXT("GUN"));
+	compGun->SetupAttachment(GetMesh(), TEXT("gunPosition"));
+	compGun->SetRelativeLocation(FVector(-7.144f, 3.68f, 4.136f));
+	compGun->SetRelativeRotation(FRotator(3.4f, 75.699f, 6.642f));
+	
 	// Note: The skeletal mesh and anim blueprint references on the Mesh component (inherited from Character) 
 	// are set in the derived blueprint asset named ThirdPersonCharacter (to avoid direct content references in C++)
 }
@@ -86,6 +94,9 @@ void ANetTPSCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 
 		// Looking
 		EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &ANetTPSCharacter::Look);
+		
+		// F 키 눌렀을 때 호출되는 함수 등록
+		EnhancedInputComponent->BindAction(takeAction, ETriggerEvent::Started, this, &ANetTPSCharacter::TakePistol);
 	}
 	else
 	{
@@ -127,4 +138,75 @@ void ANetTPSCharacter::Look(const FInputActionValue& Value)
 		AddControllerYawInput(LookAxisVector.X);
 		AddControllerPitchInput(LookAxisVector.Y);
 	}
+}
+
+void ANetTPSCharacter::TakePistol()
+{
+	// 총을 소유하고 있지 않다면 일정범위 안에 있는 총을 잡는다.
+	// 1. 총을 잡고 있지 않다면
+	if (bHasPistol == false)
+	{
+		// 2. 월드에 있는 총을 모두 찾는다.
+		TArray<AActor*> allActors;
+		TArray<AActor*> pistolActors;
+		UGameplayStatics::GetAllActorsOfClass(GetWorld(), AActor::StaticClass(), allActors);
+		for (int i = 0; i < allActors.Num(); i++)
+		{
+			if (allActors[i]->GetActorLabel().Contains(TEXT("BP_Pistol")))
+			{
+				pistolActors.Add(allActors[i]);
+			}
+		}
+
+		for (AActor* pistol : pistolActors)
+		{
+			// 만약에 pistol 의 소유자가 없다면
+			if (pistol->GetOwner() == nullptr)
+			{
+				// 3. 총과의 거리를 구하자.
+				float dist = FVector::Distance(pistol->GetActorLocation(), GetActorLocation());
+				// 4. 만약에 거리가 일정범위 안에 있다면
+				if (dist < distanceToGun)
+				{
+					// 5. 총을 Mesh 의 손에 붙히자.
+					pistol->SetOwner(this);
+					bHasPistol = true;
+					ownedPistol = pistol;
+
+					AttackPistol(pistol);
+					break;
+				}
+			}
+		}
+	}
+	// 총을 잡고 있다면
+	else
+	{
+		// 총을 놓자.
+		DetachPistol();
+
+		bHasPistol = false;
+		ownedPistol->SetOwner(nullptr);
+		ownedPistol = nullptr;
+	}	
+}
+
+void ANetTPSCharacter::AttackPistol(AActor* pistol)
+{
+	// pistol 이 가지고 있는 StaticMesh 컴포넌트 가져오자
+	UStaticMeshComponent* comp = pistol->GetComponentByClass<UStaticMeshComponent>();
+	// 가져온 컴포넌트를 이용해서 SimulatePhysisc 비활성화
+	comp->SetSimulatePhysics(false);
+	// Mesh - gunPositon 소켓에 붙히자.
+	pistol->AttachToComponent(compGun, FAttachmentTransformRules::SnapToTargetNotIncludingScale);	
+}
+
+void ANetTPSCharacter::DetachPistol()
+{
+	// pistol 이 가지고 있는 StaticMesh 컴포넌트 가져오자
+	UStaticMeshComponent* comp = ownedPistol->GetComponentByClass<UStaticMeshComponent>();
+	// 가져온 컴포넌트를 이용해서 SimulatePhysisc 활성화
+	comp->SetSimulatePhysics(true);
+	// 총을 gunPosition 에서 분리하자.
+	ownedPistol->DetachFromActor(FDetachmentTransformRules::KeepRelativeTransform);
 }
