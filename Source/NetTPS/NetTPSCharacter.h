@@ -47,6 +47,9 @@ class ANetTPSCharacter : public ACharacter
 	UPROPERTY(EditAnywhere)
 	UInputAction* takeAction;
 
+	UPROPERTY(EditAnywhere)
+	UInputAction* fireAction;
+
 public:
 	ANetTPSCharacter();
 	
@@ -63,6 +66,8 @@ protected:
 	void AttackPistol(AActor* pistol);
 	void DetachPistol();
 
+	void Fire();
+
 public:
 	// 총이 붙어야 하는 컴포넌트
 	UPROPERTY(EditAnywhere)
@@ -76,6 +81,13 @@ public:
 	// 총을 잡을 수 있는 일정범위
 	UPROPERTY(EditAnywhere)
 	float distanceToGun = 200;
+
+	
+	UPROPERTY(EditAnywhere)
+	class UParticleSystem* gunEffect;
+
+	UPROPERTY(EditAnywhere)
+	class UAnimMontage* playerMontage;
 
 protected:
 	// APawn interface

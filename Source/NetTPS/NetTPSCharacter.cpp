@@ -97,6 +97,9 @@ void ANetTPSCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 		
 		// F 키 눌렀을 때 호출되는 함수 등록
 		EnhancedInputComponent->BindAction(takeAction, ETriggerEvent::Started, this, &ANetTPSCharacter::TakePistol);
+		
+		// 마우스 왼쪽 버튼 눌렀을 때 호출되는 함수 등록
+		EnhancedInputComponent->BindAction(fireAction, ETriggerEvent::Started, this, &ANetTPSCharacter::Fire);
 	}
 	else
 	{
@@ -208,5 +211,33 @@ void ANetTPSCharacter::DetachPistol()
 	// 가져온 컴포넌트를 이용해서 SimulatePhysisc 활성화
 	comp->SetSimulatePhysics(true);
 	// 총을 gunPosition 에서 분리하자.
-	ownedPistol->DetachFromActor(FDetachmentTransformRules::KeepRelativeTransform);
+	ownedPistol->DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
+}
+
+void ANetTPSCharacter::Fire()
+{
+	// 만약에 총을 들고 있지 않다면 함수를 나가자
+	if(bHasPistol == false) return;
+	// LineTrace 로 부딪힌 곳 찾아내자.
+
+	FVector startPos = FollowCamera->GetComponentLocation();
+	FVector endPos = startPos + FollowCamera->GetForwardVector() * 100000;
+	FCollisionQueryParams params;
+	params.AddIgnoredActor(this);
+
+	FHitResult hitInfo;
+	bool bHit = GetWorld()->LineTraceSingleByChannel(hitInfo, startPos, endPos, ECollisionChannel::ECC_Visibility, params);
+
+	if (bHit)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("%s, %s"), 
+			*hitInfo.GetActor()->GetActorLabel(), 
+			*hitInfo.GetActor()->GetName());
+
+		// 맞은 위치에 파티클로 표시 하자.
+		UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), gunEffect, hitInfo.Location, FRotator(), true);
+	}
+
+	// 총쏘는 애니메이션 실행하자 (Montage 실행)
+	PlayAnimMontage(playerMontage, 2, TEXT("Fire"));
 }
