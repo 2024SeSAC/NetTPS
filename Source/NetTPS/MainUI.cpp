@@ -35,3 +35,8 @@ void UMainUI::AddBulet()
 	// 만들어진 bullet 을 bulletMagazine 에 추가하자.
 	bulletMagazine->AddChild(bullet);
 }
+
+void UMainUI::PopBullet(int32 index)
+{
+	bulletMagazine->RemoveChildAt(index);
+}

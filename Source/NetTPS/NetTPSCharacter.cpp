@@ -115,6 +115,9 @@ void ANetTPSCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 		
 		// 마우스 왼쪽 버튼 눌렀을 때 호출되는 함수 등록
 		EnhancedInputComponent->BindAction(fireAction, ETriggerEvent::Started, this, &ANetTPSCharacter::Fire);
+
+		// R 키 눌렀을 때 호출되는 함수 등록
+		EnhancedInputComponent->BindAction(reloadAction, ETriggerEvent::Started, this, &ANetTPSCharacter::Reload);
 	}
 	else
 	{
@@ -264,6 +267,13 @@ void ANetTPSCharacter::Fire()
 {
 	// 만약에 총을 들고 있지 않다면 함수를 나가자
 	if(bHasPistol == false) return;
+
+	// 현재 총알 갯수가 0보다 작거나 같으면 함수를 나가자
+	if(currBulletCount <= 0) return;
+	
+	// 재장전 중이면 함수를 나가자.
+	if(isReloading) return;
+
 	// LineTrace 로 부딪힌 곳 찾아내자.
 
 	FVector startPos = FollowCamera->GetComponentLocation();
@@ -286,4 +296,40 @@ void ANetTPSCharacter::Fire()
 
 	// 총쏘는 애니메이션 실행하자 (Montage 실행)
 	PlayAnimMontage(playerMontage, 2, TEXT("Fire"));
+
+	// 총알 제거
+	currBulletCount--;
+	mainUI->PopBullet(currBulletCount);
+}
+
+void ANetTPSCharacter::Reload()
+{
+	// 총을 가지고 있지 않고
+	if(!bHasPistol) return;
+	// 현재 총알 갯수가 최대 총알 갯수와 같으면 함수를 나가자.
+	if(currBulletCount == maxBulletCount) return;
+	// 현재 재장전 중이면 함수를 나가자.
+	if(isReloading) return;
+
+	isReloading = true;
+
+	// 장전 애니메이션 실행
+	PlayAnimMontage(playerMontage, 1, TEXT("Reload"));
+}
+
+void ANetTPSCharacter::ReloadFinish()
+{
+	isReloading = false;
+
+	// 채워야 하는 총알 갯수 계산
+	int32 addBulletCount = maxBulletCount - currBulletCount;
+
+	// 현재 총알 갯수를 최대 총알 갯수로 설정
+	currBulletCount = maxBulletCount;
+
+	// addBulletCount 만큼 총알 UI 채우자.
+	for (int i = 0; i < addBulletCount; i++)
+	{
+		mainUI->AddBulet();
+	}
 }

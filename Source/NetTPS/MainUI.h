@@ -32,4 +32,7 @@ public:
 
 	// 총알 UI 추가 함수
 	void AddBulet();
+
+	// 총알 UI 삭제 함수
+	void PopBullet(int32 index);
 };

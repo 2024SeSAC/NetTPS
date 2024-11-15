@@ -49,6 +49,9 @@ class ANetTPSCharacter : public ACharacter
 
 	UPROPERTY(EditAnywhere)
 	UInputAction* fireAction;
+	
+	UPROPERTY(EditAnywhere)
+	UInputAction* reloadAction;
 
 public:
 	ANetTPSCharacter();
@@ -70,6 +73,10 @@ protected:
 	void DetachPistol();
 
 	void Fire();
+	void Reload();
+
+public:
+	void ReloadFinish();
 
 public:
 	// 총이 붙어야 하는 컴포넌트
@@ -107,6 +114,9 @@ public:
 	float maxBulletCount = 10;
 	// 현재 총알 갯수
 	float currBulletCount = 0;
+
+	// 현재 재장전 중인지 여부
+	bool isReloading = false;
 
 
 protected:
