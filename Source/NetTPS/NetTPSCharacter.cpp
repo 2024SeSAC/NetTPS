@@ -11,6 +11,7 @@
 #include "EnhancedInputSubsystems.h"
 #include "InputActionValue.h"
 #include <Kismet/GameplayStatics.h>
+#include "MainUI.h"
 
 DEFINE_LOG_CATEGORY(LogTemplateCharacter);
 
@@ -24,11 +25,11 @@ ANetTPSCharacter::ANetTPSCharacter()
 	
 	// Don't rotate when the controller rotates. Let that just affect the camera.
 	bUseControllerRotationPitch = false;
-	bUseControllerRotationYaw = true;
+	bUseControllerRotationYaw = false;
 	bUseControllerRotationRoll = false;
 
 	// Configure character movement
-	GetCharacterMovement()->bOrientRotationToMovement = false; // Character moves in the direction of input...	
+	GetCharacterMovement()->bOrientRotationToMovement = true; // Character moves in the direction of input...	
 	GetCharacterMovement()->RotationRate = FRotator(0.0f, 500.0f, 0.0f); // ...at this rotation rate
 
 	// Note: For faster iteration times these variables, and many more, can be tweaked in the Character Blueprint
@@ -43,8 +44,8 @@ ANetTPSCharacter::ANetTPSCharacter()
 	// Create a camera boom (pulls in towards the player if there is a collision)
 	CameraBoom = CreateDefaultSubobject<USpringArmComponent>(TEXT("CameraBoom"));
 	CameraBoom->SetupAttachment(RootComponent);
-	CameraBoom->SetRelativeLocation(FVector(0, 40, 60));
-	CameraBoom->TargetArmLength = 150; // The camera follows at this distance behind the character	
+	CameraBoom->SetRelativeLocation(FVector(0, 0, 60));
+	CameraBoom->TargetArmLength = 300; // The camera follows at this distance behind the character	
 	CameraBoom->bUsePawnControlRotation = true; // Rotate the arm based on the controller
 
 	// Create a follow camera
@@ -66,6 +67,20 @@ void ANetTPSCharacter::BeginPlay()
 {
 	// Call the base class  
 	Super::BeginPlay();
+	
+	InitMainUIWidget();
+
+	// originCamPos 를 초기의 CameraBoom 값으로 설정
+	originCamPos = CameraBoom->GetRelativeLocation();
+}
+
+void ANetTPSCharacter::Tick(float DeltaSeconds)
+{
+	Super::Tick(DeltaSeconds);
+
+	// CameraBoom 이 originCamPos 를 향해서 계속 움직이자.
+	FVector pos = FMath::Lerp(CameraBoom->GetRelativeLocation(), originCamPos, DeltaSeconds * 10);
+	CameraBoom->SetRelativeLocation(pos);
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -104,6 +119,19 @@ void ANetTPSCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 	else
 	{
 		UE_LOG(LogTemplateCharacter, Error, TEXT("'%s' Failed to find an Enhanced Input component! This template is built to use the Enhanced Input system. If you intend to use the legacy system, then you will need to update this C++ file."), *GetNameSafe(this));
+	}
+}
+
+void ANetTPSCharacter::InitMainUIWidget()
+{
+	mainUI = Cast<UMainUI>( CreateWidget(GetWorld(), mainUIWidget) );
+	mainUI->AddToViewport();
+
+	// 총알 UI 생성
+	currBulletCount = maxBulletCount;
+	for (int i = 0; i < currBulletCount; i++)
+	{
+		mainUI->AddBulet();
 	}
 }
 
@@ -200,8 +228,17 @@ void ANetTPSCharacter::AttackPistol(AActor* pistol)
 	UStaticMeshComponent* comp = pistol->GetComponentByClass<UStaticMeshComponent>();
 	// 가져온 컴포넌트를 이용해서 SimulatePhysisc 비활성화
 	comp->SetSimulatePhysics(false);
-	// Mesh - gunPositon 소켓에 붙히자.
+	// compGun 에 붙히자.
 	pistol->AttachToComponent(compGun, FAttachmentTransformRules::SnapToTargetNotIncludingScale);	
+
+	// 총 들었을 때 캐릭터 회전 기능 변경 (카메라에 의해서 변경되도록)
+	bUseControllerRotationYaw = true;
+	GetCharacterMovement()->bOrientRotationToMovement = false;
+	CameraBoom->TargetArmLength = 150;
+	originCamPos = FVector(0, 40, 60);
+
+	// crosshair UI 보이게 하자.
+	mainUI->ShowCrosshair(true);
 }
 
 void ANetTPSCharacter::DetachPistol()
@@ -212,6 +249,15 @@ void ANetTPSCharacter::DetachPistol()
 	comp->SetSimulatePhysics(true);
 	// 총을 gunPosition 에서 분리하자.
 	ownedPistol->DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
+
+	// 총 놨을때 캐릭터 회전 기능 변경 (카메라와 독립)
+	bUseControllerRotationYaw = false;
+	GetCharacterMovement()->bOrientRotationToMovement = true;
+	CameraBoom->TargetArmLength = 300;
+	originCamPos = FVector(0, 0, 60);
+
+	// crosshair UI 보이지 않게 하자.
+	mainUI->ShowCrosshair(false);
 }
 
 void ANetTPSCharacter::Fire()

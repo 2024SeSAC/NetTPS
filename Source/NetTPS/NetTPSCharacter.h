@@ -56,6 +56,9 @@ public:
 
 protected:
 
+	// MainUI 초기화
+	void InitMainUIWidget();
+
 	/** Called for movement input */
 	void Move(const FInputActionValue& Value);
 
@@ -82,6 +85,9 @@ public:
 	UPROPERTY(EditAnywhere)
 	float distanceToGun = 200;
 
+	// 카메라가 위치해야하는 곳
+	FVector originCamPos;
+
 	
 	UPROPERTY(EditAnywhere)
 	class UParticleSystem* gunEffect;
@@ -89,12 +95,28 @@ public:
 	UPROPERTY(EditAnywhere)
 	class UAnimMontage* playerMontage;
 
+	// MainUI 위젯 블루프린트 클래스 담을 변수
+	UPROPERTY(EditDefaultsOnly)
+	TSubclassOf<class UMainUI> mainUIWidget;
+	// 만들어진 MainUI 를 담을 변수
+	UPROPERTY()
+	class UMainUI* mainUI;
+
+	// 최대 총알 갯수
+	UPROPERTY(EditAnywhere)
+	float maxBulletCount = 10;
+	// 현재 총알 갯수
+	float currBulletCount = 0;
+
+
 protected:
 	// APawn interface
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 	
 	// To add mapping context
 	virtual void BeginPlay();
+
+	virtual void Tick(float DeltaSeconds) override;
 
 public:
 	/** Returns CameraBoom subobject **/
