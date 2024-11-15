@@ -184,13 +184,17 @@ void ANetTPSCharacter::TakePistol()
 		TArray<AActor*> allActors;
 		TArray<AActor*> pistolActors;
 		UGameplayStatics::GetAllActorsOfClass(GetWorld(), AActor::StaticClass(), allActors);
-		for (int i = 0; i < allActors.Num(); i++)
+		for (int32 i = 0; i < allActors.Num(); i++)
 		{
 			if (allActors[i]->GetActorLabel().Contains(TEXT("BP_Pistol")))
 			{
 				pistolActors.Add(allActors[i]);
 			}
 		}
+
+		// 나와 총의 최단거리
+		float closestDist = std::numeric_limits<float>::max();
+		AActor* closestPistol = nullptr;
 
 		for (AActor* pistol : pistolActors)
 		{
@@ -202,31 +206,36 @@ void ANetTPSCharacter::TakePistol()
 				// 4. 만약에 거리가 일정범위 안에 있다면
 				if (dist < distanceToGun)
 				{
-					// 5. 총을 Mesh 의 손에 붙히자.
-					pistol->SetOwner(this);
-					bHasPistol = true;
-					ownedPistol = pistol;
-
-					AttackPistol(pistol);
-					break;
+					// closestDist 값보다 dist 값이 크다면 (더 가깝다는 의미)
+					if (closestDist > dist)
+					{
+						// 최단 거리 갱신
+						closestDist = dist;
+						closestPistol = pistol;						
+					}
 				}
 			}
 		}
+
+		// 5. 총을 Mesh 의 손에 붙히자.
+		AttackPistol(closestPistol);
 	}
 	// 총을 잡고 있다면
 	else
 	{
 		// 총을 놓자.
-		DetachPistol();
-
-		bHasPistol = false;
-		ownedPistol->SetOwner(nullptr);
-		ownedPistol = nullptr;
+		DetachPistol();		
 	}	
 }
 
 void ANetTPSCharacter::AttackPistol(AActor* pistol)
 {
+	if(pistol == nullptr) return;
+
+	pistol->SetOwner(this);
+	bHasPistol = true;
+	ownedPistol = pistol;
+
 	// pistol 이 가지고 있는 StaticMesh 컴포넌트 가져오자
 	UStaticMeshComponent* comp = pistol->GetComponentByClass<UStaticMeshComponent>();
 	// 가져온 컴포넌트를 이용해서 SimulatePhysisc 비활성화
@@ -261,6 +270,10 @@ void ANetTPSCharacter::DetachPistol()
 
 	// crosshair UI 보이지 않게 하자.
 	mainUI->ShowCrosshair(false);
+
+	bHasPistol = false;
+	ownedPistol->SetOwner(nullptr);
+	ownedPistol = nullptr;
 }
 
 void ANetTPSCharacter::Fire()
