@@ -29,6 +29,8 @@ public:
 	float maxBulletCount = 10;
 	// 현재 총알 갯수
 	float currBulletCount = 0;
+	// 무기 데미지
+	float weaponDamage = 20;
 
 public:
 	bool IsMaxBulletCount();

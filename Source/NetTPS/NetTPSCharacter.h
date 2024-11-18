@@ -115,6 +115,16 @@ public:
 	bool isReloading = false;
 
 
+	// HealthBar UI 가지는 컴포넌트
+	UPROPERTY(EditAnywhere)
+	class UWidgetComponent* compHP;
+	// 최대 HP
+	float maxHP = 100;
+	// 현재 HP
+	float currHP;
+	void DamageProcess(float damage);
+
+
 protected:
 	// APawn interface
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;

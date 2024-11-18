@@ -11,8 +11,10 @@
 #include "EnhancedInputSubsystems.h"
 #include "InputActionValue.h"
 #include <Kismet/GameplayStatics.h>
+#include "Components/WidgetComponent.h"
 #include "MainUI.h"
 #include "Pistol.h"
+#include "HealthBar.h"
 
 DEFINE_LOG_CATEGORY(LogTemplateCharacter);
 
@@ -59,7 +61,10 @@ ANetTPSCharacter::ANetTPSCharacter()
 	compGun->SetupAttachment(GetMesh(), TEXT("gunPosition"));
 	compGun->SetRelativeLocation(FVector(-7.144f, 3.68f, 4.136f));
 	compGun->SetRelativeRotation(FRotator(3.4f, 75.699f, 6.642f));
-	
+
+	// HP component
+	compHP = CreateDefaultSubobject<UWidgetComponent>(TEXT("HP"));
+	compHP->SetupAttachment(RootComponent);
 	// Note: The skeletal mesh and anim blueprint references on the Mesh component (inherited from Character) 
 	// are set in the derived blueprint asset named ThirdPersonCharacter (to avoid direct content references in C++)
 }
@@ -73,6 +78,9 @@ void ANetTPSCharacter::BeginPlay()
 
 	// originCamPos 를 초기의 CameraBoom 값으로 설정
 	originCamPos = CameraBoom->GetRelativeLocation();
+
+	// 현재 HP 를 최대 HP 로 설정
+	currHP = maxHP;
 }
 
 void ANetTPSCharacter::Tick(float DeltaSeconds)
@@ -86,6 +94,15 @@ void ANetTPSCharacter::Tick(float DeltaSeconds)
 
 //////////////////////////////////////////////////////////////////////////
 // Input
+
+void ANetTPSCharacter::DamageProcess(float damage)
+{
+	// 현재 HP 를 줄이자.
+	currHP -= damage;
+	// HBbar 를 갱신
+	UHealthBar* hpBar = Cast<UHealthBar>(compHP->GetWidget());
+	hpBar->UpdateHPBar(currHP / maxHP);
+}
 
 void ANetTPSCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
@@ -303,12 +320,20 @@ void ANetTPSCharacter::Fire()
 
 	if (bHit)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("%s, %s"), 
-			*hitInfo.GetActor()->GetActorLabel(), 
-			*hitInfo.GetActor()->GetName());
+		/*UE_LOG(LogTemp, Warning, TEXT("%s, %s"), 
+			*hitInfo.GetActor()->GetActorNameOrLabel(), 
+			*hitInfo.GetActor()->GetName());*/
 
 		// 맞은 위치에 파티클로 표시 하자.
 		UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), gunEffect, hitInfo.Location, FRotator(), true);
+
+		// 만약에 맞은 Actor 가 Player 라면
+		ANetTPSCharacter* player = Cast<ANetTPSCharacter>(hitInfo.GetActor());
+		if (player)
+		{
+			// 해당 Player 가 가지고 있는 DamageProcess 함수 실행
+			player->DamageProcess(ownedPistol->weaponDamage);
+		}
 	}
 
 	// 총쏘는 애니메이션 실행하자 (Montage 실행)
