@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
 
@@ -17,7 +17,14 @@ class NETTPS_API UHealthBar : public UUserWidget
 public:
 	UPROPERTY(meta = (BindWidget))
 	class UProgressBar* HPBar;
+
+	// 최대 HP
+	float maxHP = 100;
+	// 현재 HP
+	float currHP;
 	
 public:
-	void UpdateHPBar(float percent);
+	virtual void NativeConstruct() override;
+
+	float UpdateHPBar(float damage);
 };

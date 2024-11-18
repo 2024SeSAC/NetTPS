@@ -1,4 +1,4 @@
-// Copyright Epic Games, Inc. All Rights Reserved.
+ï»¿// Copyright Epic Games, Inc. All Rights Reserved.
 
 #pragma once
 
@@ -59,7 +59,7 @@ public:
 
 protected:
 
-	// MainUI ÃÊ±âÈ­
+	// MainUI ì´ˆê¸°í™”
 	void InitMainUIWidget();
 
 	/** Called for movement input */
@@ -81,20 +81,20 @@ public:
 
 public:
 	
-	// ÃÑÀÌ ºÙ¾î¾ß ÇÏ´Â ÄÄÆ÷³ÍÆ®
+	// ì´ì´ ë¶™ì–´ì•¼ í•˜ëŠ” ì»´í¬ë„ŒíŠ¸
 	UPROPERTY(EditAnywhere)
 	USceneComponent* compGun;
-	// ÃÑ ¼ÒÀ¯ ¿©ºÎ
+	// ì´ ì†Œìœ  ì—¬ë¶€
 	bool bHasPistol = false;
-	// ³»°¡ Àâ°í ÀÖ´Â ÃÑ 
+	// ë‚´ê°€ ì¡ê³  ìˆëŠ” ì´ 
 	UPROPERTY()
 	class APistol* ownedPistol = nullptr;
 
-	// ÃÑÀ» ÀâÀ» ¼ö ÀÖ´Â ÀÏÁ¤¹üÀ§
+	// ì´ì„ ì¡ì„ ìˆ˜ ìˆëŠ” ì¼ì •ë²”ìœ„
 	UPROPERTY(EditAnywhere)
 	float distanceToGun = 200;
 
-	// Ä«¸Ş¶ó°¡ À§Ä¡ÇØ¾ßÇÏ´Â °÷
+	// ì¹´ë©”ë¼ê°€ ìœ„ì¹˜í•´ì•¼í•˜ëŠ” ê³³
 	FVector originCamPos;
 
 	
@@ -104,25 +104,24 @@ public:
 	UPROPERTY(EditAnywhere)
 	class UAnimMontage* playerMontage;
 
-	// MainUI À§Á¬ ºí·çÇÁ¸°Æ® Å¬·¡½º ´ãÀ» º¯¼ö
+	// MainUI ìœ„ì ¯ ë¸”ë£¨í”„ë¦°íŠ¸ í´ë˜ìŠ¤ ë‹´ì„ ë³€ìˆ˜
 	UPROPERTY(EditDefaultsOnly)
 	TSubclassOf<class UMainUI> mainUIWidget;
-	// ¸¸µé¾îÁø MainUI ¸¦ ´ãÀ» º¯¼ö
+	// ë§Œë“¤ì–´ì§„ MainUI ë¥¼ ë‹´ì„ ë³€ìˆ˜
 	UPROPERTY()
 	class UMainUI* mainUI;
 
-	// ÇöÀç ÀçÀåÀü ÁßÀÎÁö ¿©ºÎ
+	// í˜„ì¬ ì¬ì¥ì „ ì¤‘ì¸ì§€ ì—¬ë¶€
 	bool isReloading = false;
 
 
-	// HealthBar UI °¡Áö´Â ÄÄÆ÷³ÍÆ®
+	// HealthBar UI ê°€ì§€ëŠ” ì»´í¬ë„ŒíŠ¸
 	UPROPERTY(EditAnywhere)
 	class UWidgetComponent* compHP;
-	// ÃÖ´ë HP
-	float maxHP = 100;
-	// ÇöÀç HP
-	float currHP;
+
+	bool isDead = false;
 	void DamageProcess(float damage);
+
 
 
 protected:

@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+ï»¿// Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
 
@@ -19,7 +19,7 @@ public:
 	virtual void NativeUpdateAnimation(float DeltaSeconds) override;
 
 public:
-	// ÃÑÀ» µé°í ÀÖ´ÂÁö ¿©ºÎ
+	// ì´ì„ ë“¤ê³  ìˆëŠ”ì§€ ì—¬ë¶€
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool bHasPistol = false;	
 
@@ -30,11 +30,15 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float dirV = 0;
 
+	// ì£½ì—ˆëŠ”ì§€ ì—¬ë¶€
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	bool isDead = false;
+
 	UPROPERTY()
 	class ANetTPSCharacter* player;
 
 public:
-	// Reload ¾Ö´Ï¸ŞÀÌ¼Ç ³¡³ª´Â ºÎºĞ¿¡ È£ÃâµÇ´Â ÇÔ¼ö
+	// Reload ì• ë‹ˆë©”ì´ì…˜ ëë‚˜ëŠ” ë¶€ë¶„ì— í˜¸ì¶œë˜ëŠ” í•¨ìˆ˜
 	UFUNCTION()
 	void AnimNotify_OnReloadFinish();
 };
