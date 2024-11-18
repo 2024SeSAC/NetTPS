@@ -12,6 +12,7 @@
 #include "InputActionValue.h"
 #include <Kismet/GameplayStatics.h>
 #include "MainUI.h"
+#include "Pistol.h"
 
 DEFINE_LOG_CATEGORY(LogTemplateCharacter);
 
@@ -130,12 +131,12 @@ void ANetTPSCharacter::InitMainUIWidget()
 	mainUI = Cast<UMainUI>( CreateWidget(GetWorld(), mainUIWidget) );
 	mainUI->AddToViewport();
 
-	// 총알 UI 생성
-	currBulletCount = maxBulletCount;
-	for (int i = 0; i < currBulletCount; i++)
-	{
-		mainUI->AddBulet();
-	}
+	//// 총알 UI 생성
+	//currBulletCount = maxBulletCount;
+	//for (int i = 0; i < currBulletCount; i++)
+	//{
+	//	mainUI->AddBulet();
+	//}
 }
 
 void ANetTPSCharacter::Move(const FInputActionValue& Value)
@@ -182,21 +183,18 @@ void ANetTPSCharacter::TakePistol()
 	{
 		// 2. 월드에 있는 총을 모두 찾는다.
 		TArray<AActor*> allActors;
-		TArray<AActor*> pistolActors;
-		UGameplayStatics::GetAllActorsOfClass(GetWorld(), AActor::StaticClass(), allActors);
+		TArray<APistol*> pistolActors;
+		UGameplayStatics::GetAllActorsOfClass(GetWorld(), APistol::StaticClass(), allActors);
 		for (int32 i = 0; i < allActors.Num(); i++)
 		{
-			if (allActors[i]->GetActorLabel().Contains(TEXT("BP_Pistol")))
-			{
-				pistolActors.Add(allActors[i]);
-			}
+			pistolActors.Add(Cast<APistol>(allActors[i]));			
 		}
 
 		// 나와 총의 최단거리
 		float closestDist = std::numeric_limits<float>::max();
-		AActor* closestPistol = nullptr;
+		APistol* closestPistol = nullptr;
 
-		for (AActor* pistol : pistolActors)
+		for (APistol* pistol : pistolActors)
 		{
 			// 만약에 pistol 의 소유자가 없다면
 			if (pistol->GetOwner() == nullptr)
@@ -228,7 +226,7 @@ void ANetTPSCharacter::TakePistol()
 	}	
 }
 
-void ANetTPSCharacter::AttackPistol(AActor* pistol)
+void ANetTPSCharacter::AttackPistol(APistol* pistol)
 {
 	if(pistol == nullptr) return;
 
@@ -251,6 +249,9 @@ void ANetTPSCharacter::AttackPistol(AActor* pistol)
 
 	// crosshair UI 보이게 하자.
 	mainUI->ShowCrosshair(true);
+
+	// ownedPistol 의 현재 총알 갯수만큼 총알 UI 를 채우자.
+	InitBulletUI();
 }
 
 void ANetTPSCharacter::DetachPistol()
@@ -271,6 +272,9 @@ void ANetTPSCharacter::DetachPistol()
 	// crosshair UI 보이지 않게 하자.
 	mainUI->ShowCrosshair(false);
 
+	// 총알 UI 지우자.
+	mainUI->PopBulletAll();
+
 	bHasPistol = false;
 	ownedPistol->SetOwner(nullptr);
 	ownedPistol = nullptr;
@@ -282,7 +286,7 @@ void ANetTPSCharacter::Fire()
 	if(bHasPistol == false) return;
 
 	// 현재 총알 갯수가 0보다 작거나 같으면 함수를 나가자
-	if(currBulletCount <= 0) return;
+	if(ownedPistol->currBulletCount <= 0) return;
 	
 	// 재장전 중이면 함수를 나가자.
 	if(isReloading) return;
@@ -311,8 +315,8 @@ void ANetTPSCharacter::Fire()
 	PlayAnimMontage(playerMontage, 2, TEXT("Fire"));
 
 	// 총알 제거
-	currBulletCount--;
-	mainUI->PopBullet(currBulletCount);
+	ownedPistol->currBulletCount--;
+	mainUI->PopBullet(ownedPistol->currBulletCount);
 }
 
 void ANetTPSCharacter::Reload()
@@ -320,7 +324,7 @@ void ANetTPSCharacter::Reload()
 	// 총을 가지고 있지 않고
 	if(!bHasPistol) return;
 	// 현재 총알 갯수가 최대 총알 갯수와 같으면 함수를 나가자.
-	if(currBulletCount == maxBulletCount) return;
+	if(ownedPistol->IsMaxBulletCount()) return;
 	// 현재 재장전 중이면 함수를 나가자.
 	if(isReloading) return;
 
@@ -331,17 +335,22 @@ void ANetTPSCharacter::Reload()
 }
 
 void ANetTPSCharacter::ReloadFinish()
-{
+{	
 	isReloading = false;
 
-	// 채워야 하는 총알 갯수 계산
-	int32 addBulletCount = maxBulletCount - currBulletCount;
-
 	// 현재 총알 갯수를 최대 총알 갯수로 설정
-	currBulletCount = maxBulletCount;
+	ownedPistol->Reload();
+
+	InitBulletUI();
+}
+
+void ANetTPSCharacter::InitBulletUI()
+{
+	// 총알 UI 다 지우자.
+	mainUI->PopBulletAll();
 
 	// addBulletCount 만큼 총알 UI 채우자.
-	for (int i = 0; i < addBulletCount; i++)
+	for (int i = 0; i < ownedPistol->currBulletCount; i++)
 	{
 		mainUI->AddBulet();
 	}

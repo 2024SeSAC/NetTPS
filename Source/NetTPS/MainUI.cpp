@@ -40,3 +40,13 @@ void UMainUI::PopBullet(int32 index)
 {
 	bulletMagazine->RemoveChildAt(index);
 }
+
+void UMainUI::PopBulletAll()
+{
+	int32 remainBullet = bulletMagazine->GetChildrenCount();
+
+	for (int32 i = remainBullet - 1; i >= 0; i--)
+	{
+		PopBullet(i);
+	}
+}

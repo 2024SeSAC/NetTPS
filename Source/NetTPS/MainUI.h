@@ -35,4 +35,7 @@ public:
 
 	// 총알 UI 삭제 함수
 	void PopBullet(int32 index);
+
+	// 총알 UI 모두 삭제 함수
+	void PopBulletAll();
 };
