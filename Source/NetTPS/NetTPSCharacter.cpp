@@ -89,6 +89,31 @@ void ANetTPSCharacter::Tick(float DeltaSeconds)
 	// CameraBoom 이 originCamPos 를 향해서 계속 움직이자.
 	FVector pos = FMath::Lerp(CameraBoom->GetRelativeLocation(), originCamPos, DeltaSeconds * 10);
 	CameraBoom->SetRelativeLocation(pos);
+
+	PrintNetLog();
+}
+
+void ANetTPSCharacter::PrintNetLog()
+{
+	// 연결상태
+	FString connStr = GetNetConnection() != nullptr ? TEXT("Valid Connection") : TEXT("Invalid Connection");
+
+	// Owner 
+	FString ownerStr = GetOwner() != nullptr ? GetOwner()->GetName() : TEXT("No Owner");
+
+	// 권한
+	FString role = UEnum::GetValueAsString<ENetRole>(GetLocalRole());
+
+	// 내것인지
+	FString isMine = IsLocallyControlled() ? TEXT("내 것") : TEXT("남의 것");
+
+	FString logStr = FString::Printf(TEXT("Connection : %s\nOwner : %s\nrole : %s\nmine : %s"), 
+					*connStr, 
+					*ownerStr,
+					*role,
+					*isMine);
+
+	DrawDebugString(GetWorld(), GetActorLocation(), logStr, nullptr, FColor::Yellow, 0, true, 1);
 }
 
 //////////////////////////////////////////////////////////////////////////
