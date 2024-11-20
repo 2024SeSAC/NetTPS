@@ -6,6 +6,7 @@
 
 #include "NetTPSCharacter.h"
 #include <Net/UnrealNetwork.h>
+#include <Kismet/KismetMathLibrary.h>
 
 // Sets default values
 ANetActor::ANetActor()
@@ -31,6 +32,13 @@ void ANetActor::BeginPlay()
 	// 1초마다 ChangeScale 함수 호출하는 타이머 등록
 	FTimerHandle handle;
 	GetWorldTimerManager().SetTimer(handle, this, &ANetActor::ChageScale, 1.0f, true);
+
+
+	if (HasAuthority())
+	{
+		FTimerHandle handleLocation;
+		GetWorldTimerManager().SetTimer(handleLocation, this, &ANetActor::ChangeLocation, 1.5f, true);
+	}
 }
 
 // Called every frame
@@ -113,6 +121,19 @@ void ANetActor::ClientRPC_ChangeScale_Implementation(FVector scale)
 void ANetActor::MulitcastRPC_ChangeScale_Implementation(FVector scale)
 {
 	SetActorScale3D(scale);
+}
+
+void ANetActor::ChangeLocation()
+{
+	// 랜덤한 위치를 뽑아내자.
+	FVector rand = UKismetMathLibrary::RandomPointInBoundingBox(GetActorLocation(), FVector(20));
+	// rand 모든 클라이언트에게 알려주자.
+	MulitcastRPC_ChangeScale(rand);
+}
+
+void ANetActor::MulticastRPC_ChnageLocation_Implementation(FVector location)
+{
+	SetActorLocation(location);
 }
 
 void ANetActor::FindOwner()

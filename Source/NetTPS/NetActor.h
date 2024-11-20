@@ -64,7 +64,10 @@ public:
 	UFUNCTION(NetMulticast, Reliable)
 	void MulitcastRPC_ChangeScale(FVector scale);
 
-
+	// RPC 이용해서 위치변경
+	void ChangeLocation();
+	UFUNCTION(NetMulticast, Reliable)
+	void MulticastRPC_ChnageLocation(FVector location);
 
 	void FindOwner();
 	void PrintNetLog();
