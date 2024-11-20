@@ -27,6 +27,10 @@ void ANetActor::BeginPlay()
 	
 	// 매터리얼 복제
 	mat = compMesh->CreateDynamicMaterialInstance(0);
+
+	// 1초마다 ChangeScale 함수 호출하는 타이머 등록
+	FTimerHandle handle;
+	GetWorldTimerManager().SetTimer(handle, this, &ANetActor::ChageScale, 1.0f, true);
 }
 
 // Called every frame
@@ -46,6 +50,7 @@ void ANetActor::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetim
 
 	// Replicate 하고 싶은 변수를 등록
 	DOREPLIFETIME(ANetActor, rotYaw);
+	DOREPLIFETIME(ANetActor, matColor);
 }
 
 void ANetActor::OnRep_RotYaw()
@@ -55,20 +60,59 @@ void ANetActor::OnRep_RotYaw()
 	SetActorRotation(rot);
 }
 
+void ANetActor::OnRep_ChangeColor()
+{
+	// 해당 색을 매터리얼 설정하자.
+	mat->SetVectorParameterValue(TEXT("FloorColor"), matColor);
+}
+
 void ANetActor::ChangeColor()
 {
-	// 시간을 흐르게 하자.
-	currTime += GetWorld()->DeltaTimeSeconds;
-	// 만약에 현재시간이 색상변경시간보다 커지면
-	if (currTime > changeTime)
+	// 만약에 서버라면
+	if (HasAuthority())
 	{
-		// 랜덤한 색상 뽑아내고
-		FLinearColor matColor = FLinearColor::MakeRandomColor();
-		// 해당 색을 매터리얼 설정하자.
-		mat->SetVectorParameterValue(TEXT("FloorColor"), matColor);
-		
-		currTime = 0;
+		// 시간을 흐르게 하자.
+		currTime += GetWorld()->DeltaTimeSeconds;
+		// 만약에 현재시간이 색상변경시간보다 커지면
+		if (currTime > changeTime)
+		{
+			// 랜덤한 색상 뽑아내고
+			matColor = FLinearColor::MakeRandomColor();
+			// 해당 색을 매터리얼 설정하자.
+			mat->SetVectorParameterValue(TEXT("FloorColor"), matColor);
+
+			currTime = 0;
+		}
 	}
+}
+
+void ANetActor::ChageScale()
+{
+	if (GetOwner() == GetWorld()->GetFirstPlayerController()->GetPawn())
+	{
+		// 서버에게 크기 변경 요청
+		ServerRPC_ChangeScale();
+	}
+}
+
+void ANetActor::ServerRPC_ChangeScale_Implementation()
+{
+	UE_LOG(LogTemp, Warning, TEXT("ServerRPC_ChangeScale_Implementation"));
+	float rand = FMath::RandRange(0.5f, 2.0f);
+
+	// 클라이언트 한테 rand 만큼 크기 변경되게 알려주자.
+	//ClientRPC_ChangeScale(FVector(rand));
+	MulitcastRPC_ChangeScale(FVector(rand));
+}
+
+void ANetActor::ClientRPC_ChangeScale_Implementation(FVector scale)
+{	
+	SetActorScale3D(scale);
+}
+
+void ANetActor::MulitcastRPC_ChangeScale_Implementation(FVector scale)
+{
+	SetActorScale3D(scale);
 }
 
 void ANetActor::FindOwner()

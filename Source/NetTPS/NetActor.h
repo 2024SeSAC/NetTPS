@@ -44,9 +44,26 @@ public:
 	UPROPERTY()
 	class UMaterialInstanceDynamic* mat;
 
+	UPROPERTY(ReplicatedUsing = OnRep_ChangeColor)
+	FLinearColor matColor;
+	UFUNCTION()
+	void OnRep_ChangeColor();
 	void ChangeColor();
 	float changeTime = 2.0f;
 	float currTime = 0;
+
+	// RPC 이용해서 크기변경
+	void ChageScale();
+	// 서버 RPC
+	UFUNCTION(Server, Reliable)
+	void ServerRPC_ChangeScale();
+	// 클라이언트 RPC
+	UFUNCTION(Client, Reliable)
+	void ClientRPC_ChangeScale(FVector scale);
+	// Multicast RPC
+	UFUNCTION(NetMulticast, Reliable)
+	void MulitcastRPC_ChangeScale(FVector scale);
+
 
 
 	void FindOwner();
