@@ -38,8 +38,17 @@ public:
 	float rotYaw = 0;
 	UFUNCTION()
 	void OnRep_RotYaw();
+	void Rotate();
+
+	// 매터리얼 색상 변경
+	UPROPERTY()
+	class UMaterialInstanceDynamic* mat;
+
+	void ChangeColor();
+	float changeTime = 2.0f;
+	float currTime = 0;
+
 
 	void FindOwner();
-	void Rotate();
 	void PrintNetLog();
 };

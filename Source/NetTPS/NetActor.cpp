@@ -25,6 +25,8 @@ void ANetActor::BeginPlay()
 {
 	Super::BeginPlay();
 	
+	// 매터리얼 복제
+	mat = compMesh->CreateDynamicMaterialInstance(0);
 }
 
 // Called every frame
@@ -34,6 +36,7 @@ void ANetActor::Tick(float DeltaTime)
 
 	FindOwner();
 	Rotate();
+	ChangeColor();
 	PrintNetLog();
 }
 
@@ -50,6 +53,22 @@ void ANetActor::OnRep_RotYaw()
 	FRotator rot = GetActorRotation();
 	rot.Yaw = rotYaw;
 	SetActorRotation(rot);
+}
+
+void ANetActor::ChangeColor()
+{
+	// 시간을 흐르게 하자.
+	currTime += GetWorld()->DeltaTimeSeconds;
+	// 만약에 현재시간이 색상변경시간보다 커지면
+	if (currTime > changeTime)
+	{
+		// 랜덤한 색상 뽑아내고
+		FLinearColor matColor = FLinearColor::MakeRandomColor();
+		// 해당 색을 매터리얼 설정하자.
+		mat->SetVectorParameterValue(TEXT("FloorColor"), matColor);
+		
+		currTime = 0;
+	}
 }
 
 void ANetActor::FindOwner()
