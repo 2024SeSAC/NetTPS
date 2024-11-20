@@ -128,7 +128,7 @@ void ANetActor::ChangeLocation()
 	// 랜덤한 위치를 뽑아내자.
 	FVector rand = UKismetMathLibrary::RandomPointInBoundingBox(GetActorLocation(), FVector(20));
 	// rand 모든 클라이언트에게 알려주자.
-	MulitcastRPC_ChangeScale(rand);
+	MulticastRPC_ChnageLocation(rand);
 }
 
 void ANetActor::MulticastRPC_ChnageLocation_Implementation(FVector location)
