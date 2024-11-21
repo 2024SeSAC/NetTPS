@@ -11,6 +11,7 @@ void UHealthBar::NativeConstruct()
 	currHP = maxHP;
 }
 
+
 float UHealthBar::UpdateHPBar(float damage)
 {
 	// 현재HP 를 damage 만큼 줄여주자.

@@ -85,11 +85,17 @@ protected:
 	UFUNCTION(NetMulticast, Reliable)
 	void MulticastRPC_Fire(bool bHit, FHitResult hitInfo);
 	void Fire();
+
+	UFUNCTION(Server, Reliable)
+	void ServerRPC_Reload();
+	UFUNCTION(NetMulticast, Reliable)
+	void MulticastRPC_Reload();
 	void Reload();
 
 public:
 	void ReloadFinish();
 	void InitBulletUI();
+	void BillboardHP();
 
 public:
 	

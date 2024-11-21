@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+ï»¿// Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
 
@@ -21,7 +21,10 @@ public:
 	UPROPERTY()
 	class UHorizontalBox* bulletMagazine;
 
-	// ÃÑ¾Ë À§Á¬ Blueprint
+	UPROPERTY(meta=(BindWidget))
+	class UHealthBar* HealthBar;
+
+	// ì´ì•Œ ìœ„ì ¯ Blueprint
 	UPROPERTY(EditDefaultsOnly)
 	TSubclassOf<UUserWidget> bulletFactory;
 
@@ -30,12 +33,12 @@ public:
 
 	void ShowCrosshair(bool isShow);
 
-	// ÃÑ¾Ë UI Ãß°¡ ÇÔ¼ö
+	// ì´ì•Œ UI ì¶”ê°€ í•¨ìˆ˜
 	void AddBulet();
 
-	// ÃÑ¾Ë UI »èÁ¦ ÇÔ¼ö
+	// ì´ì•Œ UI ì‚­ì œ í•¨ìˆ˜
 	void PopBullet(int32 index);
 
-	// ÃÑ¾Ë UI ¸ğµÎ »èÁ¦ ÇÔ¼ö
+	// ì´ì•Œ UI ëª¨ë‘ ì‚­ì œ í•¨ìˆ˜
 	void PopBulletAll();
 };

@@ -15,6 +15,7 @@
 #include "MainUI.h"
 #include "Pistol.h"
 #include "HealthBar.h"
+#include <Kismet/KismetMathLibrary.h>
 
 
 DEFINE_LOG_CATEGORY(LogTemplateCharacter);
@@ -90,7 +91,9 @@ void ANetTPSCharacter::Tick(float DeltaSeconds)
 	FVector pos = FMath::Lerp(CameraBoom->GetRelativeLocation(), originCamPos, DeltaSeconds * 10);
 	CameraBoom->SetRelativeLocation(pos);
 
-	PrintNetLog();
+	BillboardHP();
+
+	//PrintNetLog();
 }
 
 void ANetTPSCharacter::PrintNetLog()
@@ -122,13 +125,24 @@ void ANetTPSCharacter::PrintNetLog()
 void ANetTPSCharacter::DamageProcess(float damage)
 {
 	// HBbar 를 갱신
-	UHealthBar* hpBar = Cast<UHealthBar>(compHP->GetWidget());
+	UHealthBar* hpBar = nullptr;
+	// 내것이라면 MainUI HealthBar 를 갱신
+	if (IsLocallyControlled())
+	{
+		hpBar = mainUI->HealthBar;
+	}
+	// 남의것이라면 
+	else
+	{
+		hpBar = Cast<UHealthBar>(compHP->GetWidget());		
+	}	
+
 	float currHP = hpBar->UpdateHPBar(damage);
 	if (currHP <= 0)
 	{
 		// 죽음 처리
 		isDead = true;
-	}	
+	}
 }
 
 void ANetTPSCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -177,6 +191,9 @@ void ANetTPSCharacter::InitMainUIWidget()
 
 	mainUI = Cast<UMainUI>( CreateWidget(GetWorld(), mainUIWidget) );
 	mainUI->AddToViewport();
+
+	// HPBar 컴포넌트 안보이게하자
+	compHP->SetVisibility(false);
 
 	//// 총알 UI 생성
 	//currBulletCount = maxBulletCount;
@@ -396,7 +413,7 @@ void ANetTPSCharacter::Fire()
 	
 	// 재장전 중이면 함수를 나가자.
 	if(isReloading) return;
-
+	
 	// LineTrace 로 부딪힌 곳 찾아내자.
 	FVector startPos = FollowCamera->GetComponentLocation();
 	FVector endPos = startPos + FollowCamera->GetForwardVector() * 100000;
@@ -411,19 +428,29 @@ void ANetTPSCharacter::Fire()
 	ServerRPC_Fire(bHit, hitInfo);		
 }
 
-void ANetTPSCharacter::Reload() 
+void ANetTPSCharacter::ServerRPC_Reload_Implementation()
 {
 	// 총을 가지고 있지 않고
-	if(!bHasPistol) return;
+	if (!bHasPistol) return;
 	// 현재 총알 갯수가 최대 총알 갯수와 같으면 함수를 나가자.
-	if(ownedPistol->IsMaxBulletCount()) return;
+	if (ownedPistol->IsMaxBulletCount()) return;
 	// 현재 재장전 중이면 함수를 나가자.
-	if(isReloading) return;
+	if (isReloading) return;
 
+	MulticastRPC_Reload();
+}
+
+void ANetTPSCharacter::MulticastRPC_Reload_Implementation()
+{
 	isReloading = true;
 
 	// 장전 애니메이션 실행
 	PlayAnimMontage(playerMontage, 1, TEXT("Reload"));
+}
+
+void ANetTPSCharacter::Reload() 
+{
+	ServerRPC_Reload();
 }
 
 void ANetTPSCharacter::ReloadFinish()
@@ -452,4 +479,19 @@ void ANetTPSCharacter::InitBulletUI()
 	{
 		mainUI->AddBulet();
 	}
+}
+
+void ANetTPSCharacter::BillboardHP()
+{
+	// 카메라 찾자
+	AActor* cam = UGameplayStatics::GetPlayerCameraManager(GetWorld(), 0);
+	// -카메라 앞방향 값을 담자
+	FVector forward = -cam->GetActorForwardVector();
+	// 카메라 윗방향
+	FVector up = cam->GetActorUpVector();
+
+	// 위 두방향을 이용해서 HP 바의 회전 값을 구하자.
+	FRotator rot = UKismetMathLibrary::MakeRotFromXZ(forward, up);
+
+	compHP->SetWorldRotation(rot);
 }
