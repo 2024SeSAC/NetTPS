@@ -68,9 +68,17 @@ protected:
 	/** Called for looking input */
 	void Look(const FInputActionValue& Value);
 			
+	UFUNCTION(Server, Reliable)
+	void ServerRPC_TakePistol();
 	void TakePistol();
+
+	UFUNCTION(NetMulticast, Reliable)
+	void MulticastRPC_AttachPistol(class APistol* pistol);
 	void AttackPistol(class APistol* pistol);
-	void DetachPistol();
+
+	UFUNCTION(NetMulticast, Reliable)
+	void MulticastRPC_DetachPistol(class APistol* pistol);
+	void DetachPistol(class APistol* pistol);
 
 	void Fire();
 	void Reload();
