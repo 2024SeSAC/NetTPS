@@ -304,11 +304,12 @@ void ANetTPSCharacter::AttackPistol(APistol* pistol)
 	// compGun 에 붙히자.
 	pistol->AttachToComponent(compGun, FAttachmentTransformRules::SnapToTargetNotIncludingScale);	
 
+	bUseControllerRotationYaw = true;
+	GetCharacterMovement()->bOrientRotationToMovement = false;
+
 	if (IsLocallyControlled())
 	{
-		// 총 들었을 때 캐릭터 회전 기능 변경 (카메라에 의해서 변경되도록)
-		bUseControllerRotationYaw = true;
-		GetCharacterMovement()->bOrientRotationToMovement = false;
+		// 총 들었을 때 캐릭터 회전 기능 변경 (카메라에 의해서 변경되도록)		
 		CameraBoom->TargetArmLength = 150;
 		originCamPos = FVector(0, 40, 60);	
 
@@ -331,11 +332,12 @@ void ANetTPSCharacter::DetachPistol(APistol* pistol)
 	// 총을 gunPosition 에서 분리하자.
 	pistol->DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);	
 
+	bUseControllerRotationYaw = false;
+	GetCharacterMovement()->bOrientRotationToMovement = true;
+
 	if (IsLocallyControlled())
 	{
-		// 총 놨을때 캐릭터 회전 기능 변경 (카메라와 독립)
-		bUseControllerRotationYaw = false;
-		GetCharacterMovement()->bOrientRotationToMovement = true;
+		// 총 놨을때 캐릭터 회전 기능 변경 (카메라와 독립)		
 		CameraBoom->TargetArmLength = 300;
 		originCamPos = FVector(0, 0, 60);
 
@@ -348,6 +350,40 @@ void ANetTPSCharacter::DetachPistol(APistol* pistol)
 
 	bHasPistol = false;
 	ownedPistol = nullptr;
+}
+
+void ANetTPSCharacter::ServerRPC_Fire_Implementation(bool bHit, FHitResult hitInfo)
+{
+	// 모든 클라에게 파티클 나오게 해라!
+	MulticastRPC_Fire(bHit, hitInfo);
+}
+
+void ANetTPSCharacter::MulticastRPC_Fire_Implementation(bool bHit, FHitResult hitInfo)
+{
+	if (bHit)
+	{
+		// 맞은 위치에 파티클로 표시 하자.
+		UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), gunEffect, hitInfo.Location, FRotator(), true);
+
+		// 만약에 맞은 Actor 가 Player 라면
+		ANetTPSCharacter* player = Cast<ANetTPSCharacter>(hitInfo.GetActor());
+		if (player)
+		{
+			// 해당 Player 가 가지고 있는 DamageProcess 함수 실행
+			player->DamageProcess(ownedPistol->weaponDamage);
+		}
+	}
+	
+	// 총알 제거
+	ownedPistol->currBulletCount--;
+	if (IsLocallyControlled())
+	{
+		mainUI->PopBullet(ownedPistol->currBulletCount);
+
+	}
+
+	// 총쏘는 애니메이션 실행하자 (Montage 실행)
+	PlayAnimMontage(playerMontage, 2, TEXT("Fire"));
 }
 
 void ANetTPSCharacter::Fire()
@@ -370,33 +406,12 @@ void ANetTPSCharacter::Fire()
 	FHitResult hitInfo;
 	bool bHit = GetWorld()->LineTraceSingleByChannel(hitInfo, startPos, endPos, ECollisionChannel::ECC_Visibility, params);
 
-	if (bHit)
-	{
-		/*UE_LOG(LogTemp, Warning, TEXT("%s, %s"), 
-			*hitInfo.GetActor()->GetActorNameOrLabel(), 
-			*hitInfo.GetActor()->GetName());*/
 
-		// 맞은 위치에 파티클로 표시 하자.
-		UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), gunEffect, hitInfo.Location, FRotator(), true);
-
-		// 만약에 맞은 Actor 가 Player 라면
-		ANetTPSCharacter* player = Cast<ANetTPSCharacter>(hitInfo.GetActor());
-		if (player)
-		{
-			// 해당 Player 가 가지고 있는 DamageProcess 함수 실행
-			player->DamageProcess(ownedPistol->weaponDamage);
-		}
-	}
-
-	// 총쏘는 애니메이션 실행하자 (Montage 실행)
-	PlayAnimMontage(playerMontage, 2, TEXT("Fire"));
-
-	// 총알 제거
-	ownedPistol->currBulletCount--;
-	mainUI->PopBullet(ownedPistol->currBulletCount);
+	// 서버에게 파티클 나오게 요청!
+	ServerRPC_Fire(bHit, hitInfo);		
 }
 
-void ANetTPSCharacter::Reload()
+void ANetTPSCharacter::Reload() 
 {
 	// 총을 가지고 있지 않고
 	if(!bHasPistol) return;

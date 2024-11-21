@@ -80,6 +80,10 @@ protected:
 	void MulticastRPC_DetachPistol(class APistol* pistol);
 	void DetachPistol(class APistol* pistol);
 
+	UFUNCTION(Server, Reliable)
+	void ServerRPC_Fire(bool bHit, FHitResult hitInfo);
+	UFUNCTION(NetMulticast, Reliable)
+	void MulticastRPC_Fire(bool bHit, FHitResult hitInfo);
 	void Fire();
 	void Reload();
 
