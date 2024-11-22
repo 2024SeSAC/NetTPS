@@ -1,4 +1,4 @@
-// Copyright Epic Games, Inc. All Rights Reserved.
+﻿// Copyright Epic Games, Inc. All Rights Reserved.
 
 #pragma once
 
@@ -13,6 +13,16 @@ class ANetTPSGameMode : public AGameModeBase
 
 public:
 	ANetTPSGameMode();
+
+public:
+	UPROPERTY(VisibleAnywhere)
+	TArray<class ANetTPSCharacter*> allPlayers;
+	// 현재 몇 번째 Player 가 만들 차례니? 
+	int32 turnIdx;
+
+public:
+	void AddPlayer(class ANetTPSCharacter* player);
+	void ChangeTurn();
 };
 
 

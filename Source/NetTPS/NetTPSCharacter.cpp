@@ -16,6 +16,8 @@
 #include "Pistol.h"
 #include "HealthBar.h"
 #include <Kismet/KismetMathLibrary.h>
+#include <Net/UnrealNetwork.h>
+#include "NetTPSGameMode.h"
 
 
 DEFINE_LOG_CATEGORY(LogTemplateCharacter);
@@ -26,12 +28,20 @@ DEFINE_LOG_CATEGORY(LogTemplateCharacter);
 
 void ANetTPSCharacter::MakeCube()
 {
+	// 내 차례가 아니면 함수나가자
+	if(canMakeCube == false) return;
+
 	// 서버에게 큐브 만든다라고 알려주자.
 	ServerRPC_MakeCube();
 }
 
 void ANetTPSCharacter::ServerRPC_MakeCube_Implementation()
 {
+	// 턴넘기자
+	// 게임 모드 가져오자 (ANetTPSGameMode 형변환)
+	ANetTPSGameMode* gm = Cast<ANetTPSGameMode>(GetWorld()->GetAuthGameMode());
+	gm->ChangeTurn();
+
 	FVector pos = GetActorLocation() + GetActorForwardVector() * 100;
 	MulticastRPC_MakeCube(pos, GetActorRotation());
 }
@@ -103,6 +113,23 @@ void ANetTPSCharacter::BeginPlay()
 
 	// originCamPos 를 초기의 CameraBoom 값으로 설정
 	originCamPos = CameraBoom->GetRelativeLocation();
+
+	// 서버라면
+	if (HasAuthority())
+	{
+		// 게임 모드 가져오자 (ANetTPSGameMode 형변환)
+		ANetTPSGameMode* gm = Cast<ANetTPSGameMode>(GetWorld()->GetAuthGameMode());
+		// 나를 추가 시키자
+		if (gm)
+		{
+			gm->AddPlayer(this);
+		}
+		// 서버이면서 내 캐릭터라면
+		if (IsLocallyControlled())
+		{
+			canMakeCube = true;
+		}
+	}	
 }
 
 void ANetTPSCharacter::Tick(float DeltaSeconds)
@@ -116,6 +143,13 @@ void ANetTPSCharacter::Tick(float DeltaSeconds)
 	BillboardHP();
 
 	//PrintNetLog();
+}
+
+void ANetTPSCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(ANetTPSCharacter, canMakeCube);
 }
 
 void ANetTPSCharacter::PrintNetLog()

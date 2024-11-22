@@ -56,8 +56,14 @@ class ANetTPSCharacter : public ACharacter
 	UPROPERTY(EditAnywhere)
 	UInputAction* makeCubeAction;
 
+
+public:
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<AActor> cubeFactory;
+
+	UPROPERTY(Replicated)
+	bool canMakeCube = false;
+
 	void MakeCube();
 	UFUNCTION(Server, Reliable)
 	void ServerRPC_MakeCube();
@@ -161,6 +167,8 @@ protected:
 	virtual void BeginPlay();
 
 	virtual void Tick(float DeltaSeconds) override;
+
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
 public:
 	/** Returns CameraBoom subobject **/
