@@ -53,6 +53,17 @@ class ANetTPSCharacter : public ACharacter
 	UPROPERTY(EditAnywhere)
 	UInputAction* reloadAction;
 
+	UPROPERTY(EditAnywhere)
+	UInputAction* makeCubeAction;
+
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<AActor> cubeFactory;
+	void MakeCube();
+	UFUNCTION(Server, Reliable)
+	void ServerRPC_MakeCube();
+	UFUNCTION(NetMulticast, Reliable)
+	void MulticastRPC_MakeCube(FVector pos, FRotator rot);
+
 public:
 	ANetTPSCharacter();
 	

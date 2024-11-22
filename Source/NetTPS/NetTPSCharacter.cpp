@@ -24,6 +24,28 @@ DEFINE_LOG_CATEGORY(LogTemplateCharacter);
 // ANetTPSCharacter
 
 
+void ANetTPSCharacter::MakeCube()
+{
+	// 서버에게 큐브 만든다라고 알려주자.
+	ServerRPC_MakeCube();
+}
+
+void ANetTPSCharacter::ServerRPC_MakeCube_Implementation()
+{
+	FVector pos = GetActorLocation() + GetActorForwardVector() * 100;
+	MulticastRPC_MakeCube(pos, GetActorRotation());
+}
+
+void ANetTPSCharacter::MulticastRPC_MakeCube_Implementation(FVector pos, FRotator rot)
+{
+	// 큐브 생성하자
+	AActor* cube = GetWorld()->SpawnActor<AActor>(cubeFactory);
+	// 큐브의 위치를 나의 앞방향으로 100만큼 떨어진 위치에 놓자.	
+	cube->SetActorLocation(pos);
+	// 큐브의 회전값을 나의 회전값으로 설정
+	cube->SetActorRotation(rot);
+}
+
 ANetTPSCharacter::ANetTPSCharacter()
 {
 	// Set size for collision capsule
@@ -142,6 +164,19 @@ void ANetTPSCharacter::DamageProcess(float damage)
 	{
 		// 죽음 처리
 		isDead = true;
+
+		// 움직이지 못하게 하자.
+		GetCharacterMovement()->DisableMovement();
+		
+		// 충돌안되게 하자.
+		GetMesh()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);		
+
+		// 만약에 총들고 있고 내 캐릭터라면 총을 떨구자 
+		if (bHasPistol && IsLocallyControlled())
+		{
+			TakePistol();
+		}
 	}
 }
 
@@ -177,6 +212,8 @@ void ANetTPSCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 
 		// R 키 눌렀을 때 호출되는 함수 등록
 		EnhancedInputComponent->BindAction(reloadAction, ETriggerEvent::Started, this, &ANetTPSCharacter::Reload);
+
+		EnhancedInputComponent->BindAction(makeCubeAction, ETriggerEvent::Started, this, &ANetTPSCharacter::MakeCube);
 	}
 	else
 	{
@@ -279,7 +316,7 @@ void ANetTPSCharacter::ServerRPC_TakePistol_Implementation()
 			}
 		}
 
-		if (closestDist)
+		if (closestPistol)
 		{
 			// Owner 설정
 			closestPistol->SetOwner(this);
