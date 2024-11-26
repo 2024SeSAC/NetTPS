@@ -5,6 +5,7 @@
 #include "Components/Image.h"
 #include "Components/HorizontalBox.h"
 #include "Components/Button.h"
+#include "NetPlayerController.h"
 
 void UMainUI::NativeConstruct()
 {
@@ -50,10 +51,11 @@ void UMainUI::ShowBtnRetry(bool isShow)
 void UMainUI::OnRetry()
 {
 	// 마우스 커서 안보이게
-	APlayerController* pc = Cast<APlayerController>(GetWorld()->GetFirstPlayerController());
+	ANetPlayerController* pc = Cast<ANetPlayerController>(GetWorld()->GetFirstPlayerController());
 	pc->SetShowMouseCursor(false);
-	// 관찰자 모드로 전환
-	
+	// 관찰자 모드로 전환	
+	pc->ServerRPC_ChageToSpectator();
+
 	// MainUI 를 삭제
 	RemoveFromParent();
 }

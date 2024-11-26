@@ -577,7 +577,7 @@ void ANetTPSCharacter::DieProcess()
 
 	// 마우스 커서 보이게 하자.
 	APlayerController* pc = Cast<APlayerController>(Controller);
-	pc->SetShowMouseCursor(true);
+	pc->SetShowMouseCursor(true);	
 
 	// 다시하기 버튼 보이게
 	mainUI->ShowBtnRetry(true);
