@@ -24,6 +24,9 @@ public:
 	UPROPERTY(meta=(BindWidget))
 	class UHealthBar* HealthBar;
 
+	UPROPERTY(meta=(BindWidget))
+	class UButton* btnRetry;
+
 	// 총알 위젯 Blueprint
 	UPROPERTY(EditDefaultsOnly)
 	TSubclassOf<UUserWidget> bulletFactory;
@@ -32,6 +35,9 @@ public:
 	virtual void NativeConstruct() override;
 
 	void ShowCrosshair(bool isShow);
+	void ShowBtnRetry(bool isShow);
+	UFUNCTION()
+	void OnRetry();
 
 	// 총알 UI 추가 함수
 	void AddBulet();

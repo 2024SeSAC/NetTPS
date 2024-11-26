@@ -113,6 +113,7 @@ public:
 	void ReloadFinish();
 	void InitBulletUI();
 	void BillboardHP();
+	void DieProcess();
 
 public:
 	

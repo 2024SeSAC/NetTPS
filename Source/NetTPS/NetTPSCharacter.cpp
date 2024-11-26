@@ -206,6 +206,7 @@ void ANetTPSCharacter::DamageProcess(float damage)
 		GetMesh()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 		GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);		
 
+
 		// 만약에 총들고 있고 내 캐릭터라면 총을 떨구자 
 		if (bHasPistol && IsLocallyControlled())
 		{
@@ -565,4 +566,19 @@ void ANetTPSCharacter::BillboardHP()
 	FRotator rot = UKismetMathLibrary::MakeRotFromXZ(forward, up);
 
 	compHP->SetWorldRotation(rot);
+}
+
+void ANetTPSCharacter::DieProcess()
+{
+	if(IsLocallyControlled() == false) return;
+
+	// 화면 회색 처리
+	FollowCamera->PostProcessSettings.ColorSaturation = FVector4(0, 0, 0, 1);
+
+	// 마우스 커서 보이게 하자.
+	APlayerController* pc = Cast<APlayerController>(Controller);
+	pc->SetShowMouseCursor(true);
+
+	// 다시하기 버튼 보이게
+	mainUI->ShowBtnRetry(true);
 }

@@ -1,20 +1,26 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+ï»¿// Fill out your copyright notice in the Description page of Project Settings.
 
 
 #include "MainUI.h"
 #include "Components/Image.h"
 #include "Components/HorizontalBox.h"
+#include "Components/Button.h"
 
 void UMainUI::NativeConstruct()
 {
 	Super::NativeConstruct();
 
-	// crosshair image À§Á¬ °¡Á®¿ÀÀÚ.
+	// crosshair image ìœ„ì ¯ ê°€ì ¸ì˜¤ì.
 	imgCrosshair = Cast<UImage>(GetWidgetFromName(TEXT("crossHair")));
 	ShowCrosshair(false);
 
-	// bulletPanel À§Á¬ °¡Á®¿ÀÀÚ.
+	// bulletPanel ìœ„ì ¯ ê°€ì ¸ì˜¤ì.
 	bulletMagazine = Cast<UHorizontalBox>(GetWidgetFromName(TEXT("bulletPanel")));
+
+	// btnRetry ì•ˆë³´ì´ê²Œ
+	ShowBtnRetry(false);
+
+	btnRetry->OnClicked.AddDynamic(this, &UMainUI::OnRetry);
 }
 
 void UMainUI::ShowCrosshair(bool isShow)
@@ -29,10 +35,33 @@ void UMainUI::ShowCrosshair(bool isShow)
 	}
 }
 
+void UMainUI::ShowBtnRetry(bool isShow)
+{
+	if (isShow)
+	{
+		btnRetry->SetVisibility(ESlateVisibility::Visible);
+	}
+	else
+	{
+		btnRetry->SetVisibility(ESlateVisibility::Hidden);
+	}
+}
+
+void UMainUI::OnRetry()
+{
+	// ë§ˆìš°ìŠ¤ ì»¤ì„œ ì•ˆë³´ì´ê²Œ
+	APlayerController* pc = Cast<APlayerController>(GetWorld()->GetFirstPlayerController());
+	pc->SetShowMouseCursor(false);
+	// ê´€ì°°ì ëª¨ë“œë¡œ ì „í™˜
+	
+	// MainUI ë¥¼ ì‚­ì œ
+	RemoveFromParent();
+}
+
 void UMainUI::AddBulet()
 {
 	UUserWidget* bullet =  CreateWidget(GetWorld(), bulletFactory);
-	// ¸¸µé¾îÁø bullet À» bulletMagazine ¿¡ Ãß°¡ÇÏÀÚ.
+	// ë§Œë“¤ì–´ì§„ bullet ì„ bulletMagazine ì— ì¶”ê°€í•˜ì.
 	bulletMagazine->AddChild(bullet);
 }
 

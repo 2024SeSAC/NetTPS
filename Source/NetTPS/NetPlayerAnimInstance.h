@@ -41,4 +41,8 @@ public:
 	// Reload 애니메이션 끝나는 부분에 호출되는 함수
 	UFUNCTION()
 	void AnimNotify_OnReloadFinish();
+
+	// 죽음 애니메이션 끝날때 호출되는 함수
+	UFUNCTION()
+	void AnimNotify_OnDie();
 };
