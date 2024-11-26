@@ -78,6 +78,8 @@ protected:
 
 	// MainUI 초기화
 	void InitMainUIWidget();
+	UFUNCTION(Client, Reliable)
+	void ClientRPC_Init();
 
 	/** Called for movement input */
 	void Move(const FInputActionValue& Value);
@@ -88,10 +90,10 @@ protected:
 	UFUNCTION(Server, Reliable)
 	void ServerRPC_TakePistol();
 	void TakePistol();
+	
 
-	UFUNCTION(NetMulticast, Reliable)
-	void MulticastRPC_AttachPistol(class APistol* pistol);
-	void AttackPistol(class APistol* pistol);
+	UFUNCTION()
+	void AttackPistol();
 
 	UFUNCTION(NetMulticast, Reliable)
 	void MulticastRPC_DetachPistol(class APistol* pistol);
@@ -123,7 +125,7 @@ public:
 	// 총 소유 여부
 	bool bHasPistol = false;
 	// 내가 잡고 있는 총 
-	UPROPERTY()
+	UPROPERTY(ReplicatedUsing = AttackPistol)
 	class APistol* ownedPistol = nullptr;
 
 	// 총을 잡을 수 있는 일정범위
@@ -170,6 +172,8 @@ protected:
 	virtual void Tick(float DeltaSeconds) override;
 
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+
+	virtual void PossessedBy(AController* NewController) override;
 
 public:
 	/** Returns CameraBoom subobject **/
