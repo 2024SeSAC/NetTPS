@@ -248,7 +248,7 @@ void ANetTPSCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 		// R 키 눌렀을 때 호출되는 함수 등록
 		EnhancedInputComponent->BindAction(reloadAction, ETriggerEvent::Started, this, &ANetTPSCharacter::Reload);
 
-		EnhancedInputComponent->BindAction(makeCubeAction, ETriggerEvent::Started, this, &ANetTPSCharacter::MakeCube);
+		//EnhancedInputComponent->BindAction(makeCubeAction, ETriggerEvent::Started, this, &ANetTPSCharacter::MakeCube);
 	}
 	else
 	{

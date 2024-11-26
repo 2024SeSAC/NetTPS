@@ -17,4 +17,6 @@ class NETTPS_API ANetPlayerController : public APlayerController
 public:
 	UFUNCTION(Server, Reliable)
 	void ServerRPC_ChageToSpectator();
+
+	void RespawnPlayer();
 };

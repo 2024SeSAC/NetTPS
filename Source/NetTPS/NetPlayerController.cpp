@@ -20,4 +20,20 @@ void ANetPlayerController::ServerRPC_ChageToSpectator_Implementation()
 
 	// 현재 Possess 하고 있는 Pawn 을 파괴하자.
 	player->Destroy();
+
+	// 5초 뒤에 다시 살아나자.
+	FTimerHandle handle;
+	GetWorldTimerManager().SetTimer(handle, this, &ANetPlayerController::RespawnPlayer, 5, false);
+}
+
+void ANetPlayerController::RespawnPlayer()
+{
+	// 현재 Possess 하고 있는 Pawn 을 가져오자.
+	APawn* player = GetPawn();
+	// UnPossess
+	UnPossess();
+	player->Destroy();
+
+	AGameModeBase* gm = GetWorld()->GetAuthGameMode();
+	gm->RestartPlayer(this);
 }
