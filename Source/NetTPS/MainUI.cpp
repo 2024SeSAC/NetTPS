@@ -17,7 +17,6 @@ void UMainUI::NativeConstruct()
 
 	// bulletPanel 위젯 가져오자.
 	bulletMagazine = Cast<UHorizontalBox>(GetWidgetFromName(TEXT("bulletPanel")));
-
 	// btnRetry 안보이게
 	ShowBtnRetry(false);
 
