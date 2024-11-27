@@ -97,6 +97,7 @@ void UNetGameInstance::FindOtherSession()
 
 	// 활성화 되어있는 세션만 검색하자.
 	sessionSearch->QuerySettings.Set(SEARCH_PRESENCE, true, EOnlineComparisonOp::Equals);
+	//sessionSearch->QuerySettings.Set(TEXT("DP_NAME"), FString(TEXT("SeSAC1")), EOnlineComparisonOp::Equals);
 
 	// 세션을 몇개까지 검색할지
 	sessionSearch->MaxSearchResults = 100;
