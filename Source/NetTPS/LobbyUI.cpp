@@ -28,6 +28,8 @@ void ULobbyUI::NativeConstruct()
 
 	// 세션 검색되면 호출되는 함수 등록
 	gi->onAddSession.BindUObject(this, &ULobbyUI::OnAddSession);
+	// 세션 완전 검색 완료되면 호출되는 함수 등록
+	gi->onFindComplete.BindUObject(this, &ULobbyUI::OnFIndComplete);
 }
 
 void ULobbyUI::GoCreate()
@@ -38,6 +40,9 @@ void ULobbyUI::GoCreate()
 void ULobbyUI::GoFind()
 {
 	WidgetSwitcher->SetActiveWidgetIndex(2);
+
+	// 강제로 세션 검색 하자
+	FindSession();
 }
 
 void ULobbyUI::CreateSession()
@@ -59,12 +64,21 @@ void ULobbyUI::OnValueChanged(float value)
 
 void ULobbyUI::FindSession()
 {
+	// 세션 목록 다 지우자
+	scroll_SessionList->ClearChildren();
+
 	gi->FindOtherSession();
 }
 
-void ULobbyUI::OnAddSession(FString info)
+void ULobbyUI::OnAddSession(int32 idx, FString info)
 {
 	USessionItem* item = CreateWidget<USessionItem>(GetWorld(), sessionItemFactory);
 	scroll_SessionList->AddChild(item);
-	item->SetInfo(info);
+	item->SetInfo(idx, info);
+}
+
+void ULobbyUI::OnFIndComplete(bool isComplete)
+{	
+	// 검색 버튼 활성/비활성
+	btn_FindSession->SetIsEnabled(isComplete);
 }

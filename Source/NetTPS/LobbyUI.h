@@ -61,5 +61,7 @@ public:
 	UFUNCTION()
 	void FindSession();
 	UFUNCTION()
-	void OnAddSession(FString info);
+	void OnAddSession(int32 idx, FString info);
+	UFUNCTION()
+	void OnFIndComplete(bool isComplete);
 };
