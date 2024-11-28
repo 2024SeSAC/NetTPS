@@ -13,11 +13,25 @@ UCLASS()
 class NETTPS_API ULobbyUI : public UUserWidget
 {
 	GENERATED_BODY()
+
+public:
+	virtual void NativeConstruct() override;
 	
 public:
+	UPROPERTY()
+	class UNetGameInstance* gi;
+
 	UPROPERTY(meta = (BindWidget))
 	class UButton* btn_Create;
+	UFUNCTION()
+	void CreateSession();
 
 	UPROPERTY(meta = (BindWidget))
 	class UEditableTextBox* edit_DisplayName;
+
+	UPROPERTY(meta = (BindWidget))
+	class USlider* slider_PlayerCount;
+
+	UPROPERTY(meta = (BindWidget))
+	class UTextBlock* text_PlayerCount;
 };
