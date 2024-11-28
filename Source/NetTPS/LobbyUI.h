@@ -31,6 +31,8 @@ public:
 
 	UPROPERTY(meta = (BindWidget))
 	class USlider* slider_PlayerCount;
+	UFUNCTION()
+	void OnValueChanged(float value);
 
 	UPROPERTY(meta = (BindWidget))
 	class UTextBlock* text_PlayerCount;
