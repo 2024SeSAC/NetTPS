@@ -18,6 +18,7 @@ public:
 	virtual void NativeConstruct() override;
 	
 public:
+	// 화면 전환 관련
 	UPROPERTY(meta = (BindWidget))
 	class UWidgetSwitcher * WidgetSwitcher;
 	UPROPERTY(meta = (BindWidget))
@@ -33,6 +34,7 @@ public:
 	UPROPERTY()
 	class UNetGameInstance* gi;
 
+	// 세선 생성 관련
 	UPROPERTY(meta = (BindWidget))
 	class UButton* btn_Create;
 	UFUNCTION()
@@ -49,9 +51,15 @@ public:
 	UPROPERTY(meta = (BindWidget))
 	class UTextBlock* text_PlayerCount;
 
-
+	// 세션 검색 관련
 	UPROPERTY(meta = (BindWidget))
 	class UButton* btn_FindSession;
+	UPROPERTY(meta = (BindWidget))
+	class UScrollBox* scroll_SessionList;
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<class USessionItem> sessionItemFactory;
 	UFUNCTION()
 	void FindSession();
+	UFUNCTION()
+	void OnAddSession(FString info);
 };

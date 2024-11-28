@@ -122,8 +122,11 @@ void UNetGameInstance::OnFindSessionsComplete(bool bWasSuccessful)
 			
 			// 세션을 만들 사람 이름
 			FString sessionCreator = sr.Session.OwningUserName;
-
 			UE_LOG(LogTemp, Warning, TEXT("세션 : %s, 만든이 : %s"), *displayName, *sessionCreator);
+
+			// 세션 정보를 넘겨서 SessionItem 을 추가하게 하자.
+			FString sessionInfo = FString::Printf(TEXT("%s - %s"), *displayName, *sessionCreator);
+			onAddSession.ExecuteIfBound(sessionInfo);
 		}
 	}
 

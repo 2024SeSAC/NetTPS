@@ -7,7 +7,9 @@
 #include "Components/Slider.h"
 #include "Components/TextBlock.h"
 #include "Components/WidgetSwitcher.h"
+#include "Components/ScrollBox.h"
 #include "NetGameInstance.h"
+#include "SessionItem.h"
 
 void ULobbyUI::NativeConstruct()
 {
@@ -23,6 +25,9 @@ void ULobbyUI::NativeConstruct()
 
 	// slider 값이 변경되면 호출되는 함수 등록
 	slider_PlayerCount->OnValueChanged.AddDynamic(this, &ULobbyUI::OnValueChanged);
+
+	// 세션 검색되면 호출되는 함수 등록
+	gi->onAddSession.BindUObject(this, &ULobbyUI::OnAddSession);
 }
 
 void ULobbyUI::GoCreate()
@@ -55,4 +60,11 @@ void ULobbyUI::OnValueChanged(float value)
 void ULobbyUI::FindSession()
 {
 	gi->FindOtherSession();
+}
+
+void ULobbyUI::OnAddSession(FString info)
+{
+	USessionItem* item = CreateWidget<USessionItem>(GetWorld(), sessionItemFactory);
+	scroll_SessionList->AddChild(item);
+	item->SetInfo(info);
 }

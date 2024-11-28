@@ -7,9 +7,8 @@
 #include "Interfaces/OnlineSessionInterface.h"
 #include "NetGameInstance.generated.h"
 
-/**
- * 
- */
+DECLARE_DELEGATE_OneParam(FAddSession, FString);
+
 UCLASS()
 class NETTPS_API UNetGameInstance : public UGameInstance
 {
@@ -41,4 +40,6 @@ public:
 	// 세션 검색 처리
 	TSharedPtr<FOnlineSessionSearch> sessionSearch;
 
+	// 세션이 검색되었을 때 각 세션의 정보를 전달해주는 딜리게이트
+	FAddSession  onAddSession;
 };
