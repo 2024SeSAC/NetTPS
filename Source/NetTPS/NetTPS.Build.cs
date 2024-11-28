@@ -14,6 +14,7 @@ public class NetTPS : ModuleRules
 			"Engine", 
 			"InputCore", 
 			"EnhancedInput",
+			"UMG",
 			"OnlineSubsystem",
 			"OnlineSubsystemSteam"
 		});

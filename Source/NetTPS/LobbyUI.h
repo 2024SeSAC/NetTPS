@@ -18,6 +18,18 @@ public:
 	virtual void NativeConstruct() override;
 	
 public:
+	UPROPERTY(meta = (BindWidget))
+	class UWidgetSwitcher * WidgetSwitcher;
+	UPROPERTY(meta = (BindWidget))
+	class UButton* btn_Go_Create;
+	UFUNCTION()
+	void GoCreate();
+
+	UPROPERTY(meta = (BindWidget))
+	class UButton* btn_Go_Find;
+	UFUNCTION()
+	void GoFind();
+
 	UPROPERTY()
 	class UNetGameInstance* gi;
 
@@ -36,4 +48,10 @@ public:
 
 	UPROPERTY(meta = (BindWidget))
 	class UTextBlock* text_PlayerCount;
+
+
+	UPROPERTY(meta = (BindWidget))
+	class UButton* btn_FindSession;
+	UFUNCTION()
+	void FindSession();
 };
