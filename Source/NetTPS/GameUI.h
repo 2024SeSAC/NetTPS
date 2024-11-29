@@ -18,6 +18,15 @@ public:
 	UPROPERTY(meta = (BindWidget))
 	class UTextBlock* text_PlayerState;
 
+	UPROPERTY(EditDefaultsOnly)
+	TSubclassOf<class UPlayerStateUI> playerStateUIFactory;
+
+	UPROPERTY(meta = (BindWidget))
+	class UVerticalBox* vBox_PlayerState;
+
 public:
 	virtual void NativeTick(const FGeometry& MyGeometry, float InDeltaTime) override;
+
+
+	void AddPlayerStateUI(class APlayerState* ps);
 };

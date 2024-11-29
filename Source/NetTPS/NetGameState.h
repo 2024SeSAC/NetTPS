@@ -17,6 +17,8 @@ class NETTPS_API ANetGameState : public AGameStateBase
 public:
 	virtual void BeginPlay() override;
 
+	class UGameUI* GetGameUI();
+
 public:
 	UPROPERTY(EditDefaultsOnly)
 	TSubclassOf<class UGameUI> gameUIFactory;

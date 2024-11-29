@@ -19,6 +19,8 @@
 #include <Net/UnrealNetwork.h>
 #include "NetTPSGameMode.h"
 #include "GameFramework/PlayerState.h"
+#include "NetGameState.h"
+#include "GameUI.h"
 
 
 DEFINE_LOG_CATEGORY(LogTemplateCharacter);
@@ -163,6 +165,16 @@ void ANetTPSCharacter::PossessedBy(AController* NewController)
 	UE_LOG(LogTemp, Warning, TEXT("PossessedBy : %s"), *GetActorNameOrLabel());
 
 	ClientRPC_Init();
+}
+
+void ANetTPSCharacter::OnPlayerStateChanged(APlayerState* NewPlayerState, APlayerState* OldPlayerState)
+{
+	Super::OnPlayerStateChanged(NewPlayerState, OldPlayerState);
+
+	// GameState 가져오고
+	ANetGameState* gameState = Cast<ANetGameState>(GetWorld()->GetGameState());
+	// GameUI 가져와서 PlayerStateUI 하나 만들어주세요
+	gameState->GetGameUI()->AddPlayerStateUI(NewPlayerState);
 }
 
 void ANetTPSCharacter::PrintNetLog()

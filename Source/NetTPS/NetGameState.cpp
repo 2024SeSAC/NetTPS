@@ -7,8 +7,19 @@
 void ANetGameState::BeginPlay()
 {
 	Super::BeginPlay();
-
-	// GameUI 생성
-	gameUI = CreateWidget<UGameUI>(GetWorld(), gameUIFactory);
-	gameUI->AddToViewport();
 }
+
+UGameUI* ANetGameState::GetGameUI()
+{
+	if (gameUI == nullptr)
+	{
+		// GameUI 생성
+		gameUI = CreateWidget<UGameUI>(GetWorld(), gameUIFactory);
+		gameUI->AddToViewport();
+	}
+
+	return gameUI;
+}
+
+
+

@@ -5,6 +5,10 @@
 #include "GameFramework/GameState.h"
 #include "GameFramework/PlayerState.h"
 #include "Components/TextBlock.h"
+#include "Components/VerticalBox.h"
+#include "Components/VerticalBoxSlot.h"
+#include "NetPlayerState.h"
+#include "PlayerStateUI.h"
 
 class FPlayerStateSort
 {
@@ -42,4 +46,19 @@ void UGameUI::NativeTick(const FGeometry& MyGeometry, float InDeltaTime)
 		allPlayerState.Append(FString::Printf(TEXT("[%d] %s : %d\n"), playerId, *playerName, score));
 	}
 	text_PlayerState->SetText(FText::FromString(allPlayerState));
+}
+
+void UGameUI::AddPlayerStateUI(APlayerState* ps)
+{
+	UPlayerStateUI* psUI = CreateWidget<UPlayerStateUI>(GetWorld(), playerStateUIFactory);
+
+	vBox_PlayerState->AddChild(psUI);
+
+	// Panel 에 붙히고 난 후 Slot 이 생성된다!! 
+	
+	// Vertical Box Slot 을 가져오자.
+	UVerticalBoxSlot* slot = Cast<UVerticalBoxSlot>(psUI->Slot);
+	// Horizontal Alignment 을 오른쪽을 하자.
+	slot->SetHorizontalAlignment(EHorizontalAlignment::HAlign_Right);
+	slot->SetPadding(FMargin(0, 0, 20, 0));
 }
