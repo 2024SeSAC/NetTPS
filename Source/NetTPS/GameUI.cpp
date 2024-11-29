@@ -50,8 +50,10 @@ void UGameUI::NativeTick(const FGeometry& MyGeometry, float InDeltaTime)
 
 void UGameUI::AddPlayerStateUI(APlayerState* ps)
 {
-	UPlayerStateUI* psUI = CreateWidget<UPlayerStateUI>(GetWorld(), playerStateUIFactory);
+	if(ps == nullptr) return;
 
+	UPlayerStateUI* psUI = CreateWidget<UPlayerStateUI>(GetWorld(), playerStateUIFactory);
+	psUI->Init(Cast<ANetPlayerState>(ps));
 	vBox_PlayerState->AddChild(psUI);
 
 	// Panel 에 붙히고 난 후 Slot 이 생성된다!! 

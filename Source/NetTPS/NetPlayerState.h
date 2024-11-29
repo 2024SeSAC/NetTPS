@@ -6,13 +6,16 @@
 #include "GameFramework/PlayerState.h"
 #include "NetPlayerState.generated.h"
 
-/**
- * 
- */
+
+DECLARE_DELEGATE(FUpdateScore);
+
 UCLASS()
 class NETTPS_API ANetPlayerState : public APlayerState
 {
 	GENERATED_BODY()
 public:
 	ANetPlayerState(const FObjectInitializer& ObjectInitializer);
+
+	virtual void OnRep_Score() override;
+	FUpdateScore onUpdateScore;
 };

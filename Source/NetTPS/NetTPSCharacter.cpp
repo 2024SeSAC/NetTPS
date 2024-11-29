@@ -480,6 +480,7 @@ void ANetTPSCharacter::ServerRPC_Fire_Implementation(bool bHit, FHitResult hitIn
 	{
 		APlayerState* ps = GetPlayerState();
 		ps->SetScore(ps->GetScore() + 1);
+		ps->OnRep_Score();
 	}
 	
 	// 모든 클라에게 파티클 나오게 해라!
