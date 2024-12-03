@@ -7,8 +7,11 @@
 #include "Components/TextBlock.h"
 #include "Components/VerticalBox.h"
 #include "Components/VerticalBoxSlot.h"
+#include "Components/EditableTextBox.h"
+#include "Components/ScrollBox.h"
 #include "NetPlayerState.h"
 #include "PlayerStateUI.h"
+#include "ChatItem.h"
 
 class FPlayerStateSort
 {
@@ -27,6 +30,14 @@ public:
 		return (a.playerState->GetPlayerId() < b.playerState->GetPlayerId()); // 오름차순
 	}
 };
+
+void UGameUI::NativeConstruct()
+{
+	Super::NativeConstruct();
+
+	// edit_chat 에서 텍스트를 작성하고 엔터를 쳤을 때 호출되는 함수등록
+	edit_chat->OnTextCommitted.AddDynamic(this, &UGameUI::OnTextBoxCommitted);
+}
 
 void UGameUI::NativeTick(const FGeometry& MyGeometry, float InDeltaTime)
 {
@@ -87,4 +98,31 @@ void UGameUI::AddPlayerStateUI(APlayerState* ps)
 		slot->SetHorizontalAlignment(EHorizontalAlignment::HAlign_Right);
 		slot->SetPadding(FMargin(0, 0, 20, 0));
 	}	
+}
+
+void UGameUI::OnTextBoxCommitted(const FText& Text, ETextCommit::Type CommitMethod)
+{
+	// 만약에 Enter 를 쳤다면
+	if (CommitMethod == ETextCommit::OnEnter)
+	{
+		// chatItem 하나 만든다.
+		UChatItem* chatItem = CreateWidget<UChatItem>(GetWorld(), chatItemFactory);
+		// 만들어진 chatItem 에 내용을 셋팅
+		chatItem->SetContent(Text);
+		// scrollBox 자식으로 설정
+		scroll_chat->AddChild(chatItem);
+
+		// edit_chat 내용을 초기화
+		edit_chat->SetText(FText());
+	}
+	// 만약에 Enter 를 친 후 Focus 를 잃었다면
+	else if (CommitMethod == ETextCommit::OnCleared)
+	{
+		// 강제로 edit_Text 에 Focus 를 하자.
+		edit_chat->SetFocus();
+	}
+	else if (CommitMethod == ETextCommit::OnUserMovedFocus)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("포커스 변경 됨"));
+	}
 }

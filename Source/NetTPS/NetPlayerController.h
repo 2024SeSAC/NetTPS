@@ -19,4 +19,7 @@ public:
 	void ServerRPC_ChageToSpectator();
 
 	void RespawnPlayer();
+
+public:
+	virtual void Tick(float DeltaSeconds) override;
 };

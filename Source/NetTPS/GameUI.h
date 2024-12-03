@@ -31,10 +31,15 @@ public:
 	class UEditableTextBox* edit_chat;
 	UPROPERTY(meta = (BindWidget))
 	class UScrollBox* scroll_chat;
+	UPROPERTY(EditDefaultsOnly)
+	TSubclassOf<class UChatItem> chatItemFactory;
 
 public:
+	virtual void NativeConstruct() override;
 	virtual void NativeTick(const FGeometry& MyGeometry, float InDeltaTime) override;
 
-
 	void AddPlayerStateUI(class APlayerState* ps);
+
+	UFUNCTION()
+	void OnTextBoxCommitted(const FText& Text, ETextCommit::Type CommitMethod);
 };
