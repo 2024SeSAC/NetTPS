@@ -2,13 +2,14 @@
 
 
 #include "GameUI.h"
-#include "GameFramework/GameState.h"
 #include "GameFramework/PlayerState.h"
 #include "Components/TextBlock.h"
 #include "Components/VerticalBox.h"
 #include "Components/VerticalBoxSlot.h"
 #include "Components/EditableTextBox.h"
 #include "Components/ScrollBox.h"
+#include "Components/Border.h"
+#include "NetGameState.h"
 #include "NetPlayerState.h"
 #include "PlayerStateUI.h"
 #include "ChatItem.h"
@@ -37,6 +38,12 @@ void UGameUI::NativeConstruct()
 
 	// edit_chat 에서 텍스트를 작성하고 엔터를 쳤을 때 호출되는 함수등록
 	edit_chat->OnTextCommitted.AddDynamic(this, &UGameUI::OnTextBoxCommitted);
+
+	// emptyBorder 클릭 함수 등록
+	emptyBorder->OnMouseButtonDownEvent.BindUFunction(this, TEXT("OnPointerEvent"));
+
+	// 나의 PlayerState 찾아오는 Timer 돌리자
+	GetWorld()->GetTimerManager().SetTimer(playerStateHandle, this, &UGameUI::SetMyPlayerState, 0.1f, true);
 }
 
 void UGameUI::NativeTick(const FGeometry& MyGeometry, float InDeltaTime)
@@ -66,6 +73,19 @@ void UGameUI::NativeTick(const FGeometry& MyGeometry, float InDeltaTime)
 	//	allPlayerState.Append(FString::Printf(TEXT("[%d] %s : %d\n"), playerId, *playerName, score));
 	//}
 	//text_PlayerState->SetText(FText::FromString(allPlayerState));
+}
+
+void UGameUI::SetMyPlayerState()
+{
+	APlayerController* pc = GetWorld()->GetFirstPlayerController();
+	if (pc)
+	{
+		myPlayerState = pc->GetPlayerState<ANetPlayerState>();
+		if (myPlayerState)
+		{
+			GetWorld()->GetTimerManager().ClearTimer(playerStateHandle);
+		}
+	}
 }
 
 void UGameUI::AddPlayerStateUI(APlayerState* ps)
@@ -105,12 +125,33 @@ void UGameUI::OnTextBoxCommitted(const FText& Text, ETextCommit::Type CommitMeth
 	// 만약에 Enter 를 쳤다면
 	if (CommitMethod == ETextCommit::OnEnter)
 	{
+		// 현재 스크롤 된 값
+		float scrollOffset = scroll_chat->GetScrollOffset();
+		// 스크롤이 맨 끝일때의 값
+		float scrollEndofOffset = scroll_chat->GetScrollOffsetOfEnd();
+		
 		// chatItem 하나 만든다.
 		UChatItem* chatItem = CreateWidget<UChatItem>(GetWorld(), chatItemFactory);
+		// 채팅 내용을 --- > 닉네임 : 안녕하세요
+		FString chat = FString::Printf(TEXT("%s : %s"), *myPlayerState->GetPlayerName(), *Text.ToString());
+
 		// 만들어진 chatItem 에 내용을 셋팅
-		chatItem->SetContent(Text);
+		chatItem->SetContent(FText::FromString(chat));
 		// scrollBox 자식으로 설정
 		scroll_chat->AddChild(chatItem);
+
+		// 만약에 스크롤이 맨 끝이라면
+		if (scrollOffset == scrollEndofOffset)
+		{
+			// 스크롤을 강제로 끝으로 이동
+			//scroll_chat->ScrollToEnd();
+			// 개행이된 내용은 맨끝으로 이동을 하지않는 문제때문에 0.01f초 뒤에 
+			FTimerHandle handle;
+			GetWorld()->GetTimerManager().SetTimer(handle, [this]() {
+				// 강제로 끝으로 이동!
+				scroll_chat->ScrollToEnd();
+			}, 0.01f, false);
+		}
 
 		// edit_chat 내용을 초기화
 		edit_chat->SetText(FText());
@@ -125,4 +166,11 @@ void UGameUI::OnTextBoxCommitted(const FText& Text, ETextCommit::Type CommitMeth
 	{
 		UE_LOG(LogTemp, Warning, TEXT("포커스 변경 됨"));
 	}
+}
+
+FEventReply UGameUI::OnPointerEvent(FGeometry MyGeometry, const FPointerEvent& MouseEvent)
+{
+	Cast<ANetGameState>(GetWorld()->GetGameState())->ShowCursor(false);
+
+	return FEventReply();
 }

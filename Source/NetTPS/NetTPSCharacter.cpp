@@ -305,7 +305,7 @@ void ANetTPSCharacter::InitMainUIWidget()
 	if(IsLocallyControlled() == false) return;
 
 	mainUI = Cast<UMainUI>( CreateWidget(GetWorld(), mainUIWidget) );
-	mainUI->AddToViewport();
+	mainUI->AddToViewport(1);
 
 	// HPBar 컴포넌트 안보이게하자
 	compHP->SetVisibility(false);

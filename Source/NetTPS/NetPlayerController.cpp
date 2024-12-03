@@ -4,7 +4,7 @@
 #include "NetPlayerController.h"
 #include "GameFramework/GameModeBase.h"
 #include "GameFramework/SpectatorPawn.h"
-#include "Blueprint/WidgetBlueprintLibrary.h"
+#include "NetGameState.h"
 
 void ANetPlayerController::ServerRPC_ChageToSpectator_Implementation()
 {
@@ -47,9 +47,7 @@ void ANetPlayerController::Tick(float DeltaSeconds)
 	{
 		if (WasInputKeyJustPressed(EKeys::LeftControl))
 		{
-			SetShowMouseCursor(true);
-			// InputMode 를 UI 만 동작하게 만든다.
-			UWidgetBlueprintLibrary::SetInputMode_UIOnlyEx(this);
+			Cast<ANetGameState>(GetWorld()->GetGameState())->ShowCursor(true);			
 		}
 	}
 }

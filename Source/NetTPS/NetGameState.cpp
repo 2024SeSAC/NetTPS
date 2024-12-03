@@ -3,6 +3,8 @@
 
 #include "NetGameState.h"
 #include "GameUI.h"
+#include "GameFramework/PlayerController.h"
+#include "Blueprint/WidgetBlueprintLibrary.h"
 
 void ANetGameState::BeginPlay()
 {
@@ -19,6 +21,21 @@ UGameUI* ANetGameState::GetGameUI()
 	}
 
 	return gameUI;
+}
+
+void ANetGameState::ShowCursor(bool isShow)
+{
+	APlayerController* pc = GetWorld()->GetFirstPlayerController();
+	pc->SetShowMouseCursor(isShow);
+
+	if (isShow)
+	{
+		UWidgetBlueprintLibrary::SetInputMode_UIOnlyEx(pc);
+	}
+	else
+	{
+		UWidgetBlueprintLibrary::SetInputMode_GameOnly(pc);
+	}
 }
 
 

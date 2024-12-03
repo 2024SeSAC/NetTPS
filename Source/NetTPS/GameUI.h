@@ -15,6 +15,11 @@ class NETTPS_API UGameUI : public UUserWidget
 	GENERATED_BODY()
 	
 public:
+	UPROPERTY()
+	class ANetPlayerState* myPlayerState;
+	FTimerHandle playerStateHandle;
+
+
 	UPROPERTY(meta = (BindWidget))
 	class UTextBlock* text_PlayerState;
 
@@ -34,12 +39,20 @@ public:
 	UPROPERTY(EditDefaultsOnly)
 	TSubclassOf<class UChatItem> chatItemFactory;
 
+	UPROPERTY(meta = (BindWidget))
+	class UBorder* emptyBorder;
+
 public:
 	virtual void NativeConstruct() override;
 	virtual void NativeTick(const FGeometry& MyGeometry, float InDeltaTime) override;
+
+	void SetMyPlayerState();
 
 	void AddPlayerStateUI(class APlayerState* ps);
 
 	UFUNCTION()
 	void OnTextBoxCommitted(const FText& Text, ETextCommit::Type CommitMethod);
+
+	UFUNCTION()
+	FEventReply OnPointerEvent(FGeometry MyGeometry, const FPointerEvent& MouseEvent);
 };
