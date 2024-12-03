@@ -8,7 +8,6 @@
 
 void UNetGameInstance::Init()
 {
-	UE_LOG(LogTemp, Warning, TEXT("123123"));
 
 	Super::Init();
 
