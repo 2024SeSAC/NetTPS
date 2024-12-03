@@ -34,7 +34,6 @@ void ULobbyUI::NativeConstruct()
 
 void ULobbyUI::GoCreate()
 {
-	UE_LOG(LogTemp, Warning, TEXT("123123"));
 	WidgetSwitcher->SetActiveWidgetIndex(1);
 }
 
