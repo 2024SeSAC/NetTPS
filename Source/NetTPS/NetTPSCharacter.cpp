@@ -147,6 +147,24 @@ void ANetTPSCharacter::Tick(float DeltaSeconds)
 	BillboardHP();
 
 	//PrintNetLog();
+
+	if (IsLocallyControlled())
+	{
+		// 코드로 키보드 Press, Release 이벤트 받아오기
+		APlayerController* pc = GetWorld()->GetFirstPlayerController();
+		if (pc->WasInputKeyJustPressed(EKeys::F10))
+		{
+			UE_LOG(LogTemp, Warning, TEXT("F10 키 DOWN"));
+		}
+		if (pc->WasInputKeyJustReleased(EKeys::F10))
+		{
+			UE_LOG(LogTemp, Warning, TEXT("F10 키 UP"));
+		}
+		if (pc->IsInputKeyDown(EKeys::F10))
+		{
+			UE_LOG(LogTemp, Warning, TEXT("F10 키 눌리고 있음"));
+		}
+	}
 }
 
 void ANetTPSCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const

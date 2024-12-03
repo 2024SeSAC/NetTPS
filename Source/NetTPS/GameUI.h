@@ -24,6 +24,14 @@ public:
 	UPROPERTY(meta = (BindWidget))
 	class UVerticalBox* vBox_PlayerState;
 
+	UPROPERTY()
+	TArray<class UPlayerStateUI*> allPlayerState;
+
+	UPROPERTY(meta = (BindWidget))
+	class UEditableTextBox* edit_chat;
+	UPROPERTY(meta = (BindWidget))
+	class UScrollBox* scroll_chat;
+
 public:
 	virtual void NativeTick(const FGeometry& MyGeometry, float InDeltaTime) override;
 
