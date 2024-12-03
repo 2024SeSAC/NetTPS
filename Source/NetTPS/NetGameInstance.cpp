@@ -8,6 +8,8 @@
 
 void UNetGameInstance::Init()
 {
+	UE_LOG(LogTemp, Warning, TEXT("123123"));
+
 	Super::Init();
 
 	// 현재 사용하는 서브시스템을 가져오자
