@@ -5,6 +5,7 @@
 #include "GameFramework/GameModeBase.h"
 #include "GameFramework/SpectatorPawn.h"
 #include "NetGameState.h"
+#include "NetGameInstance.h"
 
 void ANetPlayerController::ServerRPC_ChageToSpectator_Implementation()
 {
@@ -39,6 +40,10 @@ void ANetPlayerController::RespawnPlayer()
 	gm->RestartPlayer(this);
 }
 
+
+
+
+
 void ANetPlayerController::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
@@ -48,6 +53,19 @@ void ANetPlayerController::Tick(float DeltaSeconds)
 		if (WasInputKeyJustPressed(EKeys::LeftControl))
 		{
 			Cast<ANetGameState>(GetWorld()->GetGameState())->ShowCursor(true);			
+		}
+
+		if (WasInputKeyJustPressed(EKeys::Zero))
+		{
+			if (HasAuthority())
+			{
+				Cast<ANetGameState>(GetWorld()->GetGameState())->MulticastRPC_DestroySession();
+			}
+			else
+			{
+				UNetGameInstance* gi = GetGameInstance<UNetGameInstance>();
+				gi->DestroyMySession();
+			}
 		}
 	}
 }

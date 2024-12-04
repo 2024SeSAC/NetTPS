@@ -24,4 +24,7 @@ public:
 
 	UFUNCTION(NetMulticast, Reliable)
 	void MulticastRPC_SendChat(const FString& chat);
+
+	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
+
 };

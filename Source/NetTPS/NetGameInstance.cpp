@@ -5,6 +5,7 @@
 #include "OnlineSubsystem.h"
 #include "OnlineSessionSettings.h"
 #include <Online/OnlineSessionNames.h>
+#include <Kismet/GameplayStatics.h>
 
 void UNetGameInstance::Init()
 {
@@ -62,6 +63,7 @@ void UNetGameInstance::OnCreateSessionComplete(FName sessionName, bool bWasSucce
 	if (bWasSuccessful)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("[%s] 세션 생성 성공"), *sessionName.ToString());
+		currSessionName = sessionName;
 		// 세션 만든 사람(서버) 이 만들어진 세션으로 이동
 		GetWorld()->ServerTravel(TEXT("/Game/Net/Mpas/BattleMap?listen"));
 	}
@@ -71,9 +73,10 @@ void UNetGameInstance::OnCreateSessionComplete(FName sessionName, bool bWasSucce
 	}
 }
 
-void UNetGameInstance::DestroyMySession(FString sessionName)
+void UNetGameInstance::DestroyMySession()
 {
-	sessionInterface->DestroySession(FName(sessionName));
+	UE_LOG(LogTemp, Warning, TEXT("123123123"));
+	sessionInterface->DestroySession(currSessionName);
 }
 
 void UNetGameInstance::OnDestroySessionComplete(FName sessionName, bool bWasSuccessful)
@@ -81,6 +84,8 @@ void UNetGameInstance::OnDestroySessionComplete(FName sessionName, bool bWasSucc
 	if (bWasSuccessful)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("[%s] 세션 파괴 성공"), *sessionName.ToString());
+		// Lobby 레벨로 이동
+		UGameplayStatics::OpenLevel(GetWorld(), TEXT("LobbyMap"));
 	}
 	else
 	{
@@ -156,6 +161,8 @@ void UNetGameInstance::OnJoinSessionComplete(FName sessionName, EOnJoinSessionCo
 {
 	if (result == EOnJoinSessionCompleteResult::Success)
 	{	
+		currSessionName = sessionName;
+
 		FString url;
 		sessionInterface->GetResolvedConnectString(sessionName, url);
 

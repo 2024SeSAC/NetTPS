@@ -3,6 +3,8 @@
 #include "NetTPSGameMode.h"
 #include "NetTPSCharacter.h"
 #include "UObject/ConstructorHelpers.h"
+#include "Kismet/GameplayStatics.h"
+#include "GameFramework/PlayerStart.h"
 
 ANetTPSGameMode::ANetTPSGameMode()
 {
@@ -17,6 +19,45 @@ ANetTPSGameMode::ANetTPSGameMode()
 void ANetTPSGameMode::AddPlayer(ANetTPSCharacter* player)
 {
 	allPlayers.Add(player);
+
+	// Spawn 자리 갯수
+	int32 spawnPosCount = 6;
+	// Spawn 각도
+	float spawnDegree = 360.0f / spawnPosCount;
+	
+	// PlayerStart 찾아오자
+	AActor* playerStart = UGameplayStatics::GetActorOfClass(GetWorld(), APlayerStart::StaticClass());
+
+
+	// 각도를 radian 값으로 변경
+	float radian = FMath::DegreesToRadians(posIdx * spawnDegree);
+	// 삼각함수 
+	FVector pos;
+	FVector dir = FVector(
+		FMath::Sin(radian), 
+		FMath::Cos(radian),
+		0
+	);
+
+
+	pos = playerStart->GetActorLocation() + dir * 200;
+	player->SetActorLocation(pos);
+	posIdx = (posIdx + 1) % spawnPosCount;
+
+
+	// 액터를 회전시켜서 회전 액터의 앞방향을 이용
+	/*player->SetActorRotation(FRotator(0, posIdx * spawnDegree, 0));
+	FVector pos = player->GetActorLocation() + player->GetActorForwardVector() * 200;
+	player->SetActorLocation(pos);
+	posIdx = (posIdx + 1) % spawnPosCount;*/
+
+	//// spawnPosCount 반복해서 playerStart 를 yaw 축을 기준으로 spawnDegree 만큼 회전
+	//for (int32 i = 0; i < spawnPosCount; i++)
+	//{	
+	//	playerStart->SetActorRotation(FRotator(0, i * spawnDegree, 0));
+	//	FVector pos = playerStart->GetActorLocation() + playerStart->GetActorForwardVector() * 200;
+	//	
+	//}
 }
 
 void ANetTPSGameMode::ChangeTurn()

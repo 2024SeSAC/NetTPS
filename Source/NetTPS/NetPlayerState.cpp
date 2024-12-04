@@ -30,3 +30,13 @@ void ANetPlayerState::MulticastRPC_SendChat_Implementation (const FString& chat)
 	ANetGameState* gameState = GetWorld()->GetGameState<ANetGameState>();
 	gameState->gameUI->AddChat(chat);
 }
+
+void ANetPlayerState::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+	Super::EndPlay(EndPlayReason);
+
+	if (HasAuthority())
+	{
+		Cast<ANetGameState>(GetWorld()->GetGameState())->LeavePlayer();
+	}
+}

@@ -20,9 +20,14 @@ public:
 	// 현재 몇 번째 Player 가 만들 차례니? 
 	int32 turnIdx;
 
+	// 내가 몇 번째 위치에서 태어나야하니?
+	int32 posIdx;
+
 public:
 	void AddPlayer(class ANetTPSCharacter* player);
 	void ChangeTurn();
+
+
 };
 
 

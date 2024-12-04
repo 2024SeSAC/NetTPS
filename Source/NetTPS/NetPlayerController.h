@@ -22,4 +22,5 @@ public:
 
 public:
 	virtual void Tick(float DeltaSeconds) override;
+
 };
