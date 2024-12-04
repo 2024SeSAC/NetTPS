@@ -97,6 +97,7 @@ void UGameUI::AddPlayerStateUI(APlayerState* ps)
 		return p->playerState == ps;
 	});
 	if(isExist) return;
+	  
 
 	UPlayerStateUI* psUI = CreateWidget<UPlayerStateUI>(GetWorld(), playerStateUIFactory);
 	psUI->Init(Cast<ANetPlayerState>(ps));
@@ -125,33 +126,10 @@ void UGameUI::OnTextBoxCommitted(const FText& Text, ETextCommit::Type CommitMeth
 	// 만약에 Enter 를 쳤다면
 	if (CommitMethod == ETextCommit::OnEnter)
 	{
-		// 현재 스크롤 된 값
-		float scrollOffset = scroll_chat->GetScrollOffset();
-		// 스크롤이 맨 끝일때의 값
-		float scrollEndofOffset = scroll_chat->GetScrollOffsetOfEnd();
-		
-		// chatItem 하나 만든다.
-		UChatItem* chatItem = CreateWidget<UChatItem>(GetWorld(), chatItemFactory);
 		// 채팅 내용을 --- > 닉네임 : 안녕하세요
 		FString chat = FString::Printf(TEXT("%s : %s"), *myPlayerState->GetPlayerName(), *Text.ToString());
-
-		// 만들어진 chatItem 에 내용을 셋팅
-		chatItem->SetContent(FText::FromString(chat));
-		// scrollBox 자식으로 설정
-		scroll_chat->AddChild(chatItem);
-
-		// 만약에 스크롤이 맨 끝이라면
-		if (scrollOffset == scrollEndofOffset)
-		{
-			// 스크롤을 강제로 끝으로 이동
-			//scroll_chat->ScrollToEnd();
-			// 개행이된 내용은 맨끝으로 이동을 하지않는 문제때문에 0.01f초 뒤에 
-			FTimerHandle handle;
-			GetWorld()->GetTimerManager().SetTimer(handle, [this]() {
-				// 강제로 끝으로 이동!
-				scroll_chat->ScrollToEnd();
-			}, 0.01f, false);
-		}
+		// 서버에게 채팅 내용을 전달하자.
+		myPlayerState->ServerRPC_SendChat(chat);
 
 		// edit_chat 내용을 초기화
 		edit_chat->SetText(FText());
@@ -165,6 +143,36 @@ void UGameUI::OnTextBoxCommitted(const FText& Text, ETextCommit::Type CommitMeth
 	else if (CommitMethod == ETextCommit::OnUserMovedFocus)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("포커스 변경 됨"));
+	}
+}
+
+void UGameUI::AddChat(FString chat)
+{
+	// 현재 스크롤 된 값
+	float scrollOffset = scroll_chat->GetScrollOffset();
+	// 스크롤이 맨 끝일때의 값
+	float scrollEndofOffset = scroll_chat->GetScrollOffsetOfEnd();
+
+	// chatItem 하나 만든다.
+	UChatItem* chatItem = CreateWidget<UChatItem>(GetWorld(), chatItemFactory);
+	
+
+	// 만들어진 chatItem 에 내용을 셋팅
+	chatItem->SetContent(FText::FromString(chat));
+	// scrollBox 자식으로 설정
+	scroll_chat->AddChild(chatItem);
+
+	// 만약에 스크롤이 맨 끝이라면
+	if (scrollOffset == scrollEndofOffset)
+	{
+		// 스크롤을 강제로 끝으로 이동
+		//scroll_chat->ScrollToEnd();
+		// 개행이된 내용은 맨끝으로 이동을 하지않는 문제때문에 0.01f초 뒤에 
+		FTimerHandle handle;
+		GetWorld()->GetTimerManager().SetTimer(handle, [this]() {
+			// 강제로 끝으로 이동!
+			scroll_chat->ScrollToEnd();
+			}, 0.01f, false);
 	}
 }
 

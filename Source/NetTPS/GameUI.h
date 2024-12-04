@@ -52,6 +52,7 @@ public:
 
 	UFUNCTION()
 	void OnTextBoxCommitted(const FText& Text, ETextCommit::Type CommitMethod);
+	void AddChat(FString chat);
 
 	UFUNCTION()
 	FEventReply OnPointerEvent(FGeometry MyGeometry, const FPointerEvent& MouseEvent);
