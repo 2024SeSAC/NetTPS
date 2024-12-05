@@ -39,7 +39,6 @@ void ANetTPSGameMode::AddPlayer(ANetTPSCharacter* player)
 		0
 	);
 
-
 	pos = playerStart->GetActorLocation() + dir * 200;
 	player->SetActorLocation(pos);
 	posIdx = (posIdx + 1) % spawnPosCount;

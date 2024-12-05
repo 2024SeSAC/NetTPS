@@ -40,10 +40,6 @@ void ANetPlayerController::RespawnPlayer()
 	gm->RestartPlayer(this);
 }
 
-
-
-
-
 void ANetPlayerController::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
@@ -52,6 +48,7 @@ void ANetPlayerController::Tick(float DeltaSeconds)
 	{
 		if (WasInputKeyJustPressed(EKeys::LeftControl))
 		{
+			UE_LOG(LogTemp, Warning, TEXT("컨트롤누름"));
 			Cast<ANetGameState>(GetWorld()->GetGameState())->ShowCursor(true);			
 		}
 
@@ -67,5 +64,15 @@ void ANetPlayerController::Tick(float DeltaSeconds)
 				gi->DestroyMySession();
 			}
 		}
+
+		if (WasInputKeyJustPressed(EKeys::O))
+		{
+			StartTalking();
+		}
+		if (WasInputKeyJustReleased(EKeys::O))
+		{
+			StopTalking();
+		}
+
 	}
 }
